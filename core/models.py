@@ -37,6 +37,7 @@ class List(models.Model):
                               related_name='lists',
                               verbose_name="Доска")
     position = models.PositiveIntegerField(default=0,
+                                           unique=True,
                                            verbose_name="Позиция")
 
     class Meta:
@@ -82,12 +83,6 @@ class Task(models.Model):
         verbose_name = 'Задача'
         verbose_name_plural = 'Задачи'
 
-    def save(self, *args, **kwargs):
-        if self.assigned_to:
-            board_members = self.list.board.members.all()
-            if self.assigned_to not in board_members:
-                raise ValidationError("Исполнитель должен быть участником доски.")
-        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.title
