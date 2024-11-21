@@ -1,10 +1,14 @@
+
+
 from django.contrib import admin
 from django.urls import path
 from .views import *
-
+from .rest_views import *
 
 
 urlpatterns = [
+    path('', main, name='main'),
+
     path('boards/', list_boards, name='list_boards'),
     path('boards/create/', create_board, name='create_board'),
     path('boards/<int:board_id>/update/', update_board, name='update_board'),
@@ -19,4 +23,6 @@ urlpatterns = [
     path('tasks/create/', create_task, name='create_task'),
     path('tasks/<int:task_id>/update/', update_task, name='update_task'),
     path('tasks/<int:task_id>/delete/', delete_task, name='delete_task'),
+
+
 ]
