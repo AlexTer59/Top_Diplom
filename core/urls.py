@@ -8,6 +8,8 @@ from .rest_views import *
 
 urlpatterns = [
     path('', main, name='main'),
+    path('test-board', board, name='board'),
+    path('login', login, name='login'),
 
     path('boards/', list_boards, name='list_boards'),
     path('boards/create/', create_board, name='create_board'),

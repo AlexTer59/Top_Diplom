@@ -1,0 +1,41 @@
+main {
+    background-color: #f8f9fa;
+}
+
+.kanban-board {
+    background-color: #f8f9fa;
+    padding: 20px 0;
+}
+
+.container-fluid {
+    padding: 0; /* Убираем внутренние отступы */
+}
+
+.kanban-board .d-flex {
+    display: flex;
+    justify-content: center; /* Центрируем колонки */
+    gap: 15px; /* Отступ между колонками */
+    flex-wrap: nowrap; /* Без переноса элементов на новую строку */
+    overflow-x: hidden; /* Убираем горизонтальную прокрутку */
+}
+
+.kanban-column {
+    min-width: 300px; /* Минимальная ширина для каждой колонки */
+    width: 300px; /* Фиксированная ширина для каждой колонки */
+    display: flex;
+    flex-direction: column;
+    flex-grow: 0; /* Колонки не растягиваются */
+}
+
+.kanban-add-column {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 300px; /* Ширина для кнопки */
+    width: 300px; /* Фиксированная ширина для кнопки */
+}
+
+.kanban-column .card-body {
+    max-height: 400px;
+    overflow-y: auto; /* Прокрутка задач в колонке */
+}
