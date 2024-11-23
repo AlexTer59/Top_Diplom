@@ -1,5 +1,7 @@
 from django.db import models
 from rest_framework.exceptions import ValidationError
+from django.utils import timezone
+from datetime import timedelta
 
 from user.models import Profile
 
@@ -64,6 +66,7 @@ class Task(models.Model):
     position = models.PositiveIntegerField(default=0, verbose_name="Позиция")
     due_date = models.DateTimeField(blank=True,
                                     null=True,
+                                    default=timezone.now() + timedelta(weeks=1),
                                     verbose_name="Срок выполнения")
     created_at = models.DateTimeField(auto_now_add=True,
                                       verbose_name="Дата создания")

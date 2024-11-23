@@ -1,9 +1,8 @@
-from enum import unique
-
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
+from django.utils.timezone import localtime
 
-from .models import Board, List, Task
+from core.models import Board, List, Task
 from user.models import Profile
 from user.serializers import *
 
@@ -36,11 +35,15 @@ class TaskSerializer(serializers.Serializer):
     board = serializers.IntegerField(source='board.id')  # Ссылаемся на ID доски
     list = serializers.IntegerField(source='list.id')  # Ссылаемся на ID списка
     position = serializers.IntegerField(default=0)
-    due_date = serializers.DateTimeField(required=False, allow_null=True)
+    # due_date = serializers.DateTimeField(required=False, allow_null=True)
+    due_date = serializers.SerializerMethodField()
     created_at = serializers.DateTimeField(read_only=True)
     updated_at = serializers.DateTimeField(read_only=True)
     labels = serializers.JSONField(required=False, default=dict)
     assigned_to = ProfileSerializer()  # Сериализуем объект Profile
+
+    def get_due_date(self, obj):
+        return localtime(obj.due_date).strftime('%d-%m-%Y %H:%M')
 
     def create(self, validated_data):
         # Создаем задачу

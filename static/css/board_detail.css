@@ -1,0 +1,126 @@
+/* Общие стили для страницы */
+main {
+    background-color: #f8f9fa;
+}
+
+/* Контейнер для канбан-доски */
+.kanban-board {
+    background-color: #f8f9fa;
+    padding: 20px 0;
+}
+
+.container-fluid {
+    padding: 0 15px;
+    max-width: 100%; /* Ограничиваем максимальной шириной */
+}
+
+/* Обертка для канбан-доски с возможностью прокрутки */
+.kanban-board-wrapper {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto; /* Горизонтальная прокрутка для доски */
+    overflow-y: auto; /* Без вертикальной прокрутки */
+    padding-top: 30px; /* Для отступа от шапки */
+    max-width: 100%; /* Ограничиваем максимальной шириной экрана */
+    justify-content: center; /* Центрируем содержимое по горизонтали */
+    flex-wrap: nowrap; /* Убираем перенос колонок на новую строку */
+}
+
+/* Полоса прокрутки для доски */
+.kanban-board-wrapper::-webkit-scrollbar {
+    height: 8px;
+}
+
+.kanban-board-wrapper::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+}
+
+.kanban-board-wrapper::-webkit-scrollbar-track {
+    background-color: transparent;
+}
+
+/* Стили для каждой колонки */
+.kanban-column {
+    flex: 0 0 300px; /* Фиксированная ширина колонки */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Стили для кнопки "Добавить список" */
+.kanban-add-column {
+    flex: 0 0 300px;
+    display: flex;
+    justify-content: center;
+    align-items: start;
+}
+
+/* Стили карточек и их содержимого */
+.card {
+    margin-bottom: 20px;
+}
+
+.card-header {
+    background-color: #3076f9;
+    font-size: 1.2rem;
+    font-weight: bold;
+    text-align: center;
+}
+
+.card-body {
+    max-height: 400px;
+    overflow-y: auto; /* Прокрутка задач в колонке */
+}
+
+.task-title {
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.task-deadline {
+    font-size: 0.9rem;
+}
+
+.task-user img {
+    border: 1px solid #ddd;
+}
+
+/* Стили футера карточки */
+.card-footer {
+    background-color: #ffffff;
+    padding: 10px;
+    border-top: 1px solid #ddd;
+    transition: background-color 0.3s ease;
+}
+
+.card-footer button {
+    border-top: 1px solid #ddd; /* Линия разделения между телом и футером */
+    border-bottom-left-radius: 0.375rem;
+    border-bottom-right-radius: 0.375rem;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    padding: 11px 20px;
+}
+
+.card-footer:hover {
+    background-color: #f2f2f2;
+}
+
+.btn-primary {
+    background-color: #3076f9;
+    color: #ffffff;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #2569d4;
+}
+
+.btn-outline-primary {
+    transition: background-color 0.3s ease;
+}
+
+.btn-outline-primary:hover {
+    background-color: #3076f9;
+    color: white;
+}

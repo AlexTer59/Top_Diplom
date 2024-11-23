@@ -1,0 +1,86 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <title>{% block title %}TaskIT{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    {% block styles %}{% endblock styles %}
+</head>
+<body>
+<!-- Шапка -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <!-- Кнопка боковой панели и логотип -->
+        <div class="d-flex align-items-center">
+            <button class="btn btn-dark mx-3" id="sidebarToggle" aria-label="Открыть меню">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <a class="navbar-brand" href="/boards">Task<span style="color: #ffdd57;">IT</span></a>
+        </div>
+
+        <!-- Строка поиска -->
+        <form class="d-flex mx-auto" id="searchForm">
+            <input class="form-control me-2" type="search" placeholder="Поиск..." aria-label="Search">
+            <button class="btn btn-outline-light" type="submit">Найти</button>
+        </form>
+
+        <!-- Юзернейм с аватаркой -->
+        {% if user.is_authenticated %}
+        <div class="dropdown mx-4">
+            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button"
+               data-bs-toggle="dropdown">
+                <img src="{% if user.profile.avatar %}{{ user.profile.avatar.url }}{% else %}https://via.placeholder.com/40{% endif %}"
+                     alt="Avatar"
+                     class="rounded-circle me-2"
+                     width="40"
+                     height="40">
+                {{ user.username }}
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" href="/profile">Профиль</a></li>
+                <li><a class="dropdown-item" href="/boards">Мои доски</a></li>
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+                <li><a class="dropdown-item" href="/logout">Выход</a></li>
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</nav>
+
+<!-- Боковая панель -->
+<div id="sidebar" class="bg-dark text-white p-3 position-fixed top-0 start-0 vh-100">
+    <button class="btn btn-close btn-close-white ms-auto" id="sidebarClose"></button>
+    <ul class="sidebar-menu list-unstyled mt-4">
+        <li><a href="/boards" class="text-decoration-none d-block py-2"><i class="bi bi-kanban"></i> Мои доски</a></li>
+        <li><a href="/profile" class="text-decoration-none d-block py-2"><i class="bi bi-person"></i> Профиль</a></li>
+        <li><a href="/colleagues" class="text-decoration-none d-block py-2"><i class="bi bi-people"></i> Коллеги</a></li>
+        <li><a href="/create-board" class="text-decoration-none d-block py-2"><i class="bi bi-plus-circle"></i> Создать доску</a></li>
+        <li><a href="/recent-changes" class="text-decoration-none d-block py-2"><i class="bi bi-clock-history"></i> Последние изменения</a></li>
+        <li><a href="/chat" class="text-decoration-none d-block py-2"><i class="bi bi-chat-dots"></i> Чат</a></li>
+        <li><a href="/tariff" class="text-decoration-none d-block py-2"><i class="bi bi-currency-exchange"></i> Текущий тариф: <span class="badge bg-light text-dark">Стандарт</span></a></li>
+        <li><a href="/pricing" class="text-decoration-none d-block py-2"><i class="bi bi-cash-stack"></i> Тарифы</a></li>
+        <li><a href="/" class="text-decoration-none d-block py-2"><i class="bi bi-lightbulb"></i> Возможности</a></li>
+    </ul>
+</div>
+
+<!-- Контент -->
+<main class="pt-4">
+    {% block content %}
+    {% endblock content %}
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{% static 'js/app_base.js' %}"></script>
+{% block script %}{% endblock script %}
+</body>
+</html>

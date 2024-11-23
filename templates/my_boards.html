@@ -1,0 +1,61 @@
+{% extends 'app_base.html' %}
+{% load static %}
+
+{% block title %}Мои доски{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'css/my_boards.css' %}">
+{% endblock styles %}
+
+{% block content %}
+<div id="app" class="container py-5">
+    <h1 class="text-center mb-5">Мои доски</h1>
+
+    <div class="row justify-content-center">
+        <!-- Колонка: Мои доски (Создатель) -->
+        <div class="col-md-5">
+            <h3 class="text-center">Создатель</h3>
+            <div class="list-group">
+                <div v-if="ownedBoards.length > 0">
+                    <a v-for="board in ownedBoards" :key="board.id" v-if="board.id" :href="`/boards/${board.id}/`"
+                        class="list-group-item d-flex justify-content-between align-items-center board-link">
+                        [[ board.name ]]
+                        <i class="bi bi-trash-fill text-danger" @mouseover="hoverDelete = board.id"
+                           @mouseleave="hoverDelete = null" @click="deleteBoard(board.id)"
+                           :style="{ opacity: hoverDelete === board.id ? 1 : 0.7, cursor: 'pointer' }"></i>
+                    </a>
+                </div>
+                <p v-else class="text-center">Здесь пусто.</p>
+            </div>
+            <div class="text-center mt-4">
+                <button class="btn btn-primary btn-lg" @click="openCreateBoard">
+                    <i class="bi bi-plus-circle"></i> Создать доску
+                </button>
+            </div>
+        </div>
+
+        <!-- Разделительная вертикальная линия -->
+        <div class="col-1">
+            <div class="vertical-line"></div>
+        </div>
+
+        <!-- Колонка: Участник -->
+        <div class="col-md-5">
+            <h3 class="text-center">Участник</h3>
+            <div class="list-group">
+                <div v-if="sharedBoards.length > 0">
+                    <a v-for="board in sharedBoards" :key="board.id" v-if="board.id" :href="`/boards/${board.id}/`"
+                        class="list-group-item d-flex justify-content-between align-items-center board-link">
+                        [[ board.name ]]
+                    </a>
+                </div>
+                <p v-else class="text-center">Здесь пусто.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<script src="{% static 'js/my_boards.js' %}"></script>
+{% endblock script %}

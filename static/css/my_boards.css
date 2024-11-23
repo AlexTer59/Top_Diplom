@@ -1,0 +1,96 @@
+/* Стили для страницы "Мои доски" */
+
+main {
+    background-color: #f8f9fa;
+}
+
+.container {
+    max-width: 1000px;
+}
+
+h3 {
+    font-size: 1.5rem;
+    color: #333;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.list-group {
+    margin-top: 20px;
+}
+
+.list-group-item {
+    transition: background-color 0.3s ease; /* Плавный переход */
+}
+
+.list-group-item:first-child {
+    border-top-left-radius: 0.375rem;
+    border-top-right-radius: 0.375rem;
+}
+
+.list-group-item:last-child {
+    border-bottom-left-radius: 0.375rem;
+    border-bottom-right-radius: 0.375rem;
+}
+
+.list-group-item:hover {
+    background-color: #f8f9fa; /* Легкий фон при наведении */
+}
+
+.bi-trash-fill {
+    transition: color 0.3s ease, transform 0.3s ease; /* Эффект наведения на корзину */
+}
+
+.bi-trash-fill:hover {
+    color: #ff6b6b; /* Подсветка красным при наведении */
+    transform: scale(1.2); /* Увеличение при наведении */
+}
+
+/* Вертикальная линия между колонками */
+.vertical-line {
+    border-left: 1px solid lightgray; /* Цвет линии */
+    height: 100%; /* Высота линии — от верхнего до нижнего края */
+    margin: 0 20px; /* Отступы слева и справа */
+}
+
+/* Гиперссылки для досок */
+.board-link {
+    padding: 10px 15px;
+    border-radius: 5px;
+    text-decoration: none;
+    color: #333;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.board-link:hover {
+    background-color: #f1f1f1;
+    color: #3076f9; /* Цвет текста при наведении */
+}
+
+/* Кнопка "Создать доску" */
+.btn-primary {
+    background-color: #3076f9;
+    border-color: #3076f9;
+    color: white;
+    padding: 8px 20px;
+    border-radius: 5px;
+    font-size: 1rem;
+    transition: background-color 0.3s;
+}
+
+.btn-primary:hover {
+    background-color: #2569d4;
+    border-color: #2569d4;
+}
+
+/* Иконка плюсика в кнопке */
+.btn-lg i {
+    margin-right: 10px;
+}
+
+/* Дополнительные отступы */
+.mt-4 {
+    margin-top: 20px;
+}

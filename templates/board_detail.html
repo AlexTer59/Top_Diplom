@@ -1,0 +1,60 @@
+{% extends 'app_base.html' %}
+{% load static %}
+
+{% block title %}Канбан доска{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'css/board_detail.css' %}">
+{% endblock styles %}
+
+{% block content %}
+<section class="kanban-board py-5" id="app" data-board-id="{{ board_id }}">
+    <div class="container-fluid px-3">
+        <h1 class="text-center mb-5">[[ board.name ]]</h1>
+
+        <!-- Колонки и задачи -->
+        <div class="kanban-board-wrapper d-flex overflow-auto">
+            <div v-for="list in lists" :key="list.id" class="kanban-column">
+                <div class="card">
+                    <div class="card-header text-white text-center">
+                        <h4>[[ list.name ]]</h4>
+                    </div>
+                    <div class="card-body">
+                        <div v-if="tasks[list.id] && tasks[list.id].length > 0">
+                            <div v-for="task in tasks[list.id]" :key="task.id" class="task-card card mb-3">
+                                <div class="card-body">
+                                    <h6 class="task-title mb-4">[[ task.title ]]</h6>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="task-deadline text-muted">Срок:<br>[[ task.due_date ]]</span>
+                                        <div class="task-user d-flex align-items-center">
+                                            <img :src="task.assigned_to.avatar || 'https://via.placeholder.com/40'"
+                                                 alt="Avatar" class="rounded-circle me-2" width="40" height="40">
+                                            <span class="text-muted">[[ task.assigned_to.user.username ]]</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button class="btn btn-outline-primary w-100">Детали</button>
+                            </div>
+                        </div>
+                        <p v-else class="text-center text-muted">Здесь ничего нет</p> <!-- Сообщение, если задач нет -->
+                    </div>
+                    <div class="card-footer p-0">
+                        <button class="btn btn-primary w-100 h-100 rounded-0 rounded-bottom" @click="addTask(list.id)">Добавить задачу</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Кнопка "Добавить список" -->
+            <div class="kanban-add-column d-flex align-items-start justify-content-start">
+                <button class="btn btn-outline-primary" @click="addNewList">
+                    <i class="bi bi-plus-circle"></i> Добавить список
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block script %}
+<script src="{% static 'js/board_detail.js' %}"></script>
+{% endblock script %}
