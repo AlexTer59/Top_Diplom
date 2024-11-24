@@ -39,7 +39,6 @@ class List(models.Model):
                               related_name='lists',
                               verbose_name="Доска")
     position = models.PositiveIntegerField(default=0,
-                                           unique=True,
                                            verbose_name="Позиция")
 
     class Meta:

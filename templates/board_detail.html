@@ -1,14 +1,14 @@
 {% extends 'app_base.html' %}
 {% load static %}
 
-{% block title %}Канбан доска{% endblock %}
+{% block title %}Доска{% endblock %}
 
 {% block styles %}
 <link rel="stylesheet" href="{% static 'css/board_detail.css' %}">
 {% endblock styles %}
 
 {% block content %}
-<section class="kanban-board py-5" id="app" data-board-id="{{ board_id }}">
+<section class="kanban-board py-5" id="app" data-board-id="{{ board_id }}" data-user-id="{{ user.profile.id }}">
     <div class="container-fluid px-3">
         <h1 class="text-center mb-5">[[ board.name ]]</h1>
 
@@ -18,7 +18,7 @@
                 <div class="card">
                     <div class="card-header text-white d-flex justify-content-center align-items-center position-relative">
                         <h4 class="mb-0">[[ list.name ]]</h4>
-                        <i class="bi bi-pencil edit-icon position-absolute" @click="openEditListPopup(list)"></i>
+                        <i v-if="isOwner" class="bi bi-pencil edit-icon position-absolute" @click="openEditListPopup(list)"></i>
                     </div>
                     <div class="card-body">
                         <div v-if="tasks[list.id] && tasks[list.id].length > 0">
@@ -46,7 +46,7 @@
             </div>
 
             <!-- Кнопка "Добавить список" -->
-            <div class="kanban-add-column d-flex align-items-start justify-content-start">
+            <div v-if="isOwner" class="kanban-add-column d-flex align-items-start justify-content-start">
                 <button class="btn btn-outline-primary" @click="openCreateListPopup">
                     <i class="bi bi-plus-circle"></i> Добавить список
                 </button>
@@ -56,7 +56,7 @@
         <!-- Сообщение, если списков нет -->
         <div class="text-center" v-else>
             <p class="text-muted">Здесь ничего нет</p>
-            <button
+            <button v-if="isOwner"
                 class="btn btn-outline-primary mt-3" @click="openCreateListPopup">
                 <i class="bi bi-plus-circle"></i> Добавить список
             </button>

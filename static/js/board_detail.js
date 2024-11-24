@@ -16,6 +16,7 @@ new Vue({
             tasks: {},  // Массив задач для каждого списка
             newListName: "", // Для имени нового списка
             editListId: null,
+            isOwner: false,
         };
     },
     mounted() {
@@ -35,6 +36,7 @@ new Vue({
                 const boardResponse = await fetch(`${this.baseUrl}api/boards/${this.boardId}/`);
                 const boardData = await boardResponse.json();
                 this.board = boardData; // Сохраняем данные о доске
+                this.isOwner = this.board.owner.id == this.$el.getAttribute('data-user-id'); // Проверяем, является ли текущий пользователь владельцем
 
                 // Запрашиваем все списки для этой доски
                 const listsResponse = await fetch(`${this.baseUrl}api/boards/${this.boardId}/lists/`);
