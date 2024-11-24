@@ -1,5 +1,3 @@
-// board_detail.js
-
 // Получаем CSRF токен
 function getCsrfToken() {
     return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
@@ -16,6 +14,8 @@ new Vue({
             board: {}, // Данные о доске
             lists: [],  // Массив для списков
             tasks: {},  // Массив задач для каждого списка
+            newListName: "", // Для имени нового списка
+            editListId: null,
         };
     },
     mounted() {
@@ -54,12 +54,110 @@ new Vue({
 
         // Метод для добавления новой задачи в список
         addTask(listId) {
-            console.log(`Добавить задачу в список ${listId}`);
+            console.log('Добавить задачу в список ${listId}');
         },
 
         // Метод для добавления нового списка
-        addNewList() {
-            console.log("Добавить новый список");
+        async addNewList() {
+            if (!this.newListName.trim()) {
+                alert("Введите имя списка");
+                return;
+            }
+
+            try{
+                const response = await fetch(`${this.baseUrl}api/boards/${this.boardId}/lists/create/`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": getCsrfToken(),
+                    },
+                    body: JSON.stringify({ name: this.newListName }),
+                });
+
+                if (!response.ok) {
+                    throw new Error("Ошибка при добавлении списка");
+                }
+
+                const newList = await response.json();
+                this.lists.push(newList);
+                this.closeCreateListPopup()
+                this.newListName = '';
+
+            } catch(error) {
+                print('err')
+                alert(error.message);
+            }
         },
-    }
+
+        async editList() {
+            if (!this.newListName.trim()) {
+                alert('Введите имя списка');
+                return;
+            }
+            try {
+                const response = await fetch(`${this.baseUrl}api/boards/${this.boardId}/lists/${this.editListId.id}/edit/`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken(),
+                    },
+                    body: JSON.stringify({ name: this.newListName }),
+                });
+                if (!response.ok) {
+                    throw new Error('Ошибка при обновлении списка');
+                }
+                const updatedList = await response.json();
+                const index = this.lists.findIndex(list => list.id === updatedList.id);
+                if (index !== -1) {
+                    // Обновляем список в массиве с использованием this.$set
+                    this.$set(this.lists, index, updatedList);
+                }
+                this.closeEditListPopup();
+
+            } catch (error) {
+                alert(error.message);
+            }
+        },
+
+        async deleteList(listId) {
+            if (confirm('Вы уверены, что хотите удалить этот список?')) {
+                try {
+                    const response = await fetch(`${this.baseUrl}api/lists/${listId}/`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCsrfToken(),
+                        },
+                    });
+                    if (!response.ok) {
+                        throw new Error('Ошибка при удалении списка');
+                    }
+                    this.lists = this.lists.filter(list => list.id !== listId);
+                } catch (error) {
+                    alert(error.message);
+                }
+            }
+        },
+
+        openCreateListPopup() {
+            const modal = new bootstrap.Modal(document.getElementById('addListModal'));
+            modal.show(); // Явно вызываем Bootstrap метод для открытия окна
+        },
+        closeCreateListPopup() {
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addListModal'));
+            modal.hide(); // Явно вызываем Bootstrap метод для скрытия окна
+        },
+
+        openEditListPopup(list) {
+            const modal = new bootstrap.Modal(document.getElementById('editListModal'));
+            this.newListName = list.name;
+            this.editListId = list;
+            modal.show(); // Явно вызываем Bootstrap метод для открытия окна
+        },
+
+        closeEditListPopup() {
+            const modal = bootstrap.Modal.getInstance(document.getElementById('editListModal'));
+            modal.hide(); // Явно вызываем Bootstrap метод для скрытия окна
+        },
+    },
 });

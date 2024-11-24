@@ -1,7 +1,6 @@
 from rest_framework import serializers
-from rest_framework.validators import UniqueValidator
 from django.utils.timezone import localtime
-
+from django.db import models
 from core.models import Board, List, Task
 from user.models import Profile
 from user.serializers import *
@@ -79,7 +78,34 @@ class ListSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     name = serializers.CharField(max_length=255)
     board = serializers.IntegerField(source='board.id')  # ID доски
-    position = serializers.IntegerField(validators=[UniqueValidator
-                                                    (queryset=List.objects.all())])
+    position = serializers.IntegerField(read_only=True)
 
+    def create(self, validated_data):
+        # Получаем board_id из validated_data
+        board_id = validated_data['board'].id
 
+        # Получаем доску
+        board = Board.objects.get(id=board_id)
+
+        # Вычисляем максимальную позицию для этой доски
+        max_position = List.objects.filter(board=board).aggregate(models.Max('position'))['position__max'] or 0
+        validated_data['position'] = max_position + 1  # Увеличиваем на 1
+
+        # Создаем новый список с вычисленной позицией
+        list_instance = List.objects.create(
+            board=board,
+            name=validated_data['name'],
+            position=validated_data['position'],
+        )
+        return list_instance
+
+    def update(self, instance, validated_data):
+        # Обновляем только разрешенные поля
+        instance.name = validated_data.get('name', instance.name)
+
+        # Важное замечание: не изменяем 'position' по умолчанию, если только не требуется изменить порядок
+        # instance.position = validated_data.get('position', instance.position)  # Если хотите изменить position, раскомментируйте
+
+        instance.save()  # Сохраняем обновленные данные
+
+        return instance

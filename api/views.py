@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from core.models import Board, List, Task
 from .serializers import BoardSerializer, ListSerializer, TaskSerializer
+from .utils import *
 
 
 # ==================== My Board =====================
@@ -34,16 +35,17 @@ def shared_boards(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def detail_board(request, board_id):
-    """Получение досоки по ID"""
-    profile = request.user.profile
+    """Получение доски по ID"""
+
     try:
-        board_instance = Board.objects.get(id=board_id)
-    except Board.DoesNotExist:
-        return Response({'error': 'Board not found'}, status=status.HTTP_404_NOT_FOUND)
-    if board_instance.owner != profile and not board_instance.members.filter(id=profile.id).exists():
-        return Response({'error': 'You do not have permission to view this board.'}, status=status.HTTP_403_FORBIDDEN)
-    serializer = BoardSerializer(board_instance)
-    return Response(serializer.data)
+        board_instance = get_object_or_404(Board, id=board_id)
+        check_board_access(request.user.profile, board_instance, 'R')
+        serializer = BoardSerializer(board_instance)
+        return Response(serializer.data)
+    except PermissionDenied as e:
+        return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 # ==================== CRUD Board =====================
@@ -64,99 +66,92 @@ def create_board(request):
 def update_board(request, board_id):
     """Обновление списка по ID"""
     try:
-        board_instance = Board.objects.get(id=board_id)
-    except Board.DoesNotExist:
-        return Response({'error': 'Board not found'}, status=status.HTTP_404_NOT_FOUND)
-
-    serializer = BoardSerializer(board_instance, data=request.data, partial=True)
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        board_instance = get_object_or_404(Board, id=board_id)
+        check_board_access(request.user.profile, board_instance, 'U')
+        serializer = BoardSerializer(board_instance, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+    except PermissionDenied as e:
+            return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
 def delete_board(request, board_id):
     """Удаление списка по ID"""
-    profile = request.user.profile
     try:
-        board_instance = Board.objects.get(id=board_id)
-        if board_instance.owner == profile:
-            board_instance.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response({'error': 'Only the owner can delete a board'}, status=status.HTTP_403_FORBIDDEN)
-    except Board.DoesNotExist:
-        return Response({'error': 'Board not found'}, status=status.HTTP_404_NOT_FOUND)
+        board_instance = get_object_or_404(Board, id=board_id)
+        check_board_access(request.user.profile, board_instance, 'D')
+        board_instance.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    except PermissionDenied as e:
+        return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-
-# ==================== My List =====================
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_lists_by_board(request, board_id):
     """Получение всех списков для указанной доски по board_id"""
-    profile = request.user.profile
-
-    # Получаем доску по ID. Если не находим, возвращаем ошибку 404
-    board = get_object_or_404(Board, id=board_id)
-
-    # Проверяем, является ли пользователь владельцем или участником доски
-    if board.owner != profile and profile not in board.members.all():
-        return Response({'error': 'You do not have permission to view this board.'}, status=status.HTTP_403_FORBIDDEN)
-
     try:
-        # Фильтруем списки по board_id
-        lists = List.objects.filter(board_id=board_id)
-
-        # Если списки найдены, сериализуем и возвращаем
-        if lists.exists():
-            serializer = ListSerializer(lists, many=True)
-            return Response(serializer.data)
-        else:
-            # Если списки не найдены
-            return Response({'message': 'No lists found for this board.'}, status=status.HTTP_404_NOT_FOUND)
+        board_instance = get_object_or_404(Board, id=board_id)
+        check_list_access(request.user.profile, board_instance, 'R')
+        lists = List.objects.filter(board_id=board_instance.id)
+        serializer = ListSerializer(lists, many=True)
+        return Response(serializer.data)
+    except PermissionDenied as e:
+            return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
     except Exception as e:
         # Обработка других ошибок
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-# ==================== CRUD List =====================
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def list_lists(request):
-    """Получение всех списков"""
-    lists = List.objects.all()
-    serializer = ListSerializer(lists, many=True)
-    return Response(serializer.data)
-
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def create_list(request):
-    """Создание нового списка"""
-    serializer = ListSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+def create_list(request, board_id):
+    try:
+        board_instance = get_object_or_404(Board, id=board_id)
+        check_list_access(request.user.profile, board_instance, 'C')
+        data = request.data.copy()
+        data['board'] = board_instance.id  # Передаем только ID доски
+
+        serializer = ListSerializer(data=data)
+
+        if serializer.is_valid():
+            serializer.save(board=board_instance)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except PermissionDenied as e:
+        return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
+    except Exception as e:
+        # Обработка других ошибок
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
-def update_list(request, list_id):
+def edit_list(request, board_id, list_id):
     """Обновление списка по ID"""
     try:
-        list_instance = List.objects.get(id=list_id)
-    except List.DoesNotExist:
-        return Response({'error': 'List not found'}, status=status.HTTP_404_NOT_FOUND)
-
-    serializer = ListSerializer(list_instance, data=request.data, partial=True)
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        list_instance = get_object_or_404(List, id=list_id)
+        check_list_access(request.user.profile, list_instance, 'U')
+        serializer = ListSerializer(list_instance, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except PermissionDenied as e:
+        return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
+    except Exception as e:
+        # Обработка других ошибок
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['DELETE'])
@@ -164,11 +159,16 @@ def update_list(request, list_id):
 def delete_list(request, list_id):
     """Удаление списка по ID"""
     try:
-        list_instance = List.objects.get(id=list_id)
+        list_instance = get_object_or_404(List, id=list_id)
+        check_list_access(request.user.profile, list_instance, 'D')
         list_instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-    except List.DoesNotExist:
-        return Response({'error': 'List not found'}, status=status.HTTP_404_NOT_FOUND)
+    except PermissionDenied as e:
+        return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
+    except Exception as e:
+        # Обработка других ошибок
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 # ==================== My Task =====================
@@ -176,21 +176,15 @@ def delete_list(request, list_id):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_tasks_by_list(request, list_id):
-    profile = request.user.profile
-
-    # Получаем доску по ID. Если не находим, возвращаем ошибку 404
-    list_instance = get_object_or_404(List, id=list_id)
-
-    # Получаем доску, к которой относится этот список
-    board = list_instance.board
-
-    # Проверяем, является ли пользователь владельцем или участником доски
-    if board.owner != profile and profile not in board.members.all():
-        return Response({'error': 'You do not have permission to view this board.'}, status=status.HTTP_403_FORBIDDEN)
-
     try:
+        # Получаем доску по ID. Если не находим, возвращаем ошибку 404
+        list_instance = get_object_or_404(List, id=list_id)
+
+        # Проверяем есть ли у пользователя доступ
+        check_task_access(request.user.profile, list_instance, 'R')
+
         # Получаем все задачи для указанного списка
-        tasks = Task.objects.filter(list_id=list_id)
+        tasks = Task.objects.filter(list_id=list_instance.id)
 
         # Если списки найдены, сериализуем и возвращаем
         if tasks.exists():
@@ -199,6 +193,8 @@ def get_tasks_by_list(request, list_id):
         else:
             # Если списки не найдены
             return Response({'message': 'No tasks found for this list.'}, status=status.HTTP_404_NOT_FOUND)
+    except PermissionDenied as e:
+        return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
     except Exception as e:
         # Обработка других ошибок
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)

@@ -13,11 +13,12 @@
         <h1 class="text-center mb-5">[[ board.name ]]</h1>
 
         <!-- Колонки и задачи -->
-        <div class="kanban-board-wrapper d-flex overflow-auto">
+        <div class="kanban-board-wrapper" v-if="lists.length > 0">
             <div v-for="list in lists" :key="list.id" class="kanban-column">
                 <div class="card">
-                    <div class="card-header text-white text-center">
-                        <h4>[[ list.name ]]</h4>
+                    <div class="card-header text-white d-flex justify-content-center align-items-center position-relative">
+                        <h4 class="mb-0">[[ list.name ]]</h4>
+                        <i class="bi bi-pencil edit-icon position-absolute" @click="openEditListPopup(list)"></i>
                     </div>
                     <div class="card-body">
                         <div v-if="tasks[list.id] && tasks[list.id].length > 0">
@@ -46,12 +47,74 @@
 
             <!-- Кнопка "Добавить список" -->
             <div class="kanban-add-column d-flex align-items-start justify-content-start">
-                <button class="btn btn-outline-primary" @click="addNewList">
+                <button class="btn btn-outline-primary" @click="openCreateListPopup">
                     <i class="bi bi-plus-circle"></i> Добавить список
                 </button>
             </div>
         </div>
+
+        <!-- Сообщение, если списков нет -->
+        <div class="text-center" v-else>
+            <p class="text-muted">Здесь ничего нет</p>
+            <button
+                class="btn btn-outline-primary mt-3" @click="openCreateListPopup">
+                <i class="bi bi-plus-circle"></i> Добавить список
+            </button>
+        </div>
     </div>
+
+    <!-- Модальное окно для создания списка -->
+    <div class="modal fade" id="addListModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Добавить список</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <input
+                        type="text"
+                        v-model="newListName"
+                        class="form-control"
+                        placeholder="Введите название списка"
+                    />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="button" class="btn btn-primary" @click="addNewList">Добавить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+   <!-- Модальное окно для редактирования списка -->
+    <div class="modal fade" id="editListModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Редактировать список</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <input
+                        type="text"
+                        v-model="newListName"
+                        class="form-control"
+                        placeholder="Введите название списка"
+                    />
+                </div>
+                <div class="modal-footer justify-content-between">
+                    <button type="button" class="btn btn-danger" @click="editList">Удалить</button>
+                    <div class="safe-btns">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                        <button type="button" class="btn btn-primary" @click="editList">Сохранить</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
 </section>
 {% endblock %}
 
