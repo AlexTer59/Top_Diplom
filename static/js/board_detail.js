@@ -95,7 +95,7 @@ new Vue({
                 return;
             }
             try {
-                const response = await fetch(`${this.baseUrl}api/boards/${this.boardId}/lists/${this.editListId.id}/edit/`, {
+                const response = await fetch(`${this.baseUrl}api/boards/${this.boardId}/lists/${this.editListId}/edit/`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -114,25 +114,34 @@ new Vue({
                 }
                 this.closeEditListPopup();
 
+
             } catch (error) {
                 alert(error.message);
             }
         },
 
-        async deleteList(listId) {
+        async deleteList() {
             if (confirm('Вы уверены, что хотите удалить этот список?')) {
                 try {
-                    const response = await fetch(`${this.baseUrl}api/lists/${listId}/`, {
+                    // Отправляем запрос на сервер для удаления списка
+                    const response = await fetch(`${this.baseUrl}api/boards/${this.boardId}/lists/${this.editListId}/delete/`, {
                         method: 'DELETE',
                         headers: {
                             'Content-Type': 'application/json',
                             'X-CSRFToken': getCsrfToken(),
                         },
                     });
+
                     if (!response.ok) {
                         throw new Error('Ошибка при удалении списка');
                     }
-                    this.lists = this.lists.filter(list => list.id !== listId);
+
+                    // Удаляем список из локального массива
+                    const index = this.lists.findIndex(list => list.id === this.editListId); // Найдем индекс элемента
+                    if (index !== -1) {
+                        this.lists.splice(index, 1); // Удаляем элемент по индексу
+                    }
+                    this.closeEditListPopup();
                 } catch (error) {
                     alert(error.message);
                 }
@@ -151,12 +160,14 @@ new Vue({
         openEditListPopup(list) {
             const modal = new bootstrap.Modal(document.getElementById('editListModal'));
             this.newListName = list.name;
-            this.editListId = list;
+            this.editListId = list.id;
             modal.show(); // Явно вызываем Bootstrap метод для открытия окна
         },
 
         closeEditListPopup() {
             const modal = bootstrap.Modal.getInstance(document.getElementById('editListModal'));
+            this.newListName = '';
+            this.editListId = null;
             modal.hide(); // Явно вызываем Bootstrap метод для скрытия окна
         },
     },

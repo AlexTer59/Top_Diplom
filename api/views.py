@@ -156,7 +156,7 @@ def edit_list(request, board_id, list_id):
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
-def delete_list(request, list_id):
+def delete_list(request, board_id, list_id):
     """Удаление списка по ID"""
     try:
         list_instance = get_object_or_404(List, id=list_id)
