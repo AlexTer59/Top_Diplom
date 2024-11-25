@@ -11,7 +11,6 @@
 <section class="kanban-board py-5" id="app" data-board-id="{{ board_id }}" data-user-id="{{ user.profile.id }}">
     <div class="container-fluid px-3">
         <h1 class="text-center mb-5">[[ board.name ]]</h1>
-
         <!-- Колонки и задачи -->
         <div class="kanban-board-wrapper" v-if="lists.length > 0">
             <div v-for="list in lists" :key="list.id" class="kanban-column">
@@ -22,7 +21,13 @@
                     </div>
                     <div class="card-body">
                         <div v-if="tasks[list.id] && tasks[list.id].length > 0">
-                            <div v-for="task in tasks[list.id]" :key="task.id" class="task-card card mb-3">
+                            <div v-for="task in tasks[list.id]" :key="task.id" class="task-card card mb-3"
+                                 :class="{
+                                     'task-in-progress': task.status === 'in_progress',
+                                     'task-urgent': task.status === 'urgent',
+                                     'task-overdue': task.status === 'overdue',
+                                     'task-completed': task.status === 'completed'
+                                 }">
                                 <div class="card-body">
                                     <h6 class="task-title mb-4">[[ task.title ]]</h6>
                                     <div class="d-flex justify-content-between align-items-center">
@@ -30,7 +35,7 @@
                                         <div class="task-user d-flex align-items-center">
                                             <img :src="task.assigned_to.avatar || 'https://via.placeholder.com/40'"
                                                  alt="Avatar" class="rounded-circle me-2" width="40" height="40">
-                                            <span class="text-muted">[[ task.assigned_to.user.username ]]</span>
+                                            <span class="text-muted">[[ task.assigned_to_username ]]</span>
                                         </div>
                                     </div>
                                 </div>
@@ -40,7 +45,7 @@
                         <p v-else class="text-center text-muted">Здесь ничего нет</p> <!-- Сообщение, если задач нет -->
                     </div>
                     <div class="card-footer p-0">
-                        <button class="btn btn-primary w-100 h-100 rounded-0 rounded-bottom" @click="addTask(list.id)">Добавить задачу</button>
+                        <button class="btn btn-primary w-100 h-100 rounded-0 rounded-bottom" @click="openAddTaskPopup(list.id)">Добавить задачу</button>
                     </div>
                 </div>
             </div>
@@ -115,7 +120,69 @@
         </div>
     </div>
 
+    <!-- Модальное окно для создания задачи -->
+    <div class="modal fade" id="addTaskModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Добавить задачу</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Поле для названия задачи -->
+                    <p class="mb-1">Название задачи:</p>
+                    <input
+                        type="text"
+                        v-model="newTaskTitle"
+                        class="form-control"
+                        placeholder="Введите название задачи"
+                    />
+                    <br>
 
+                    <p class="mb-1">Описание задачи:</p>
+                    <!-- Поле для описания задачи -->
+                    <textarea
+                        v-model="newTaskDescription"
+                        class="form-control"
+                        rows="3"
+                        placeholder="Введите описание задачи"
+                    ></textarea>
+                    <br>
+
+                    <p class="mb-1">Дедлайн:</p>
+                    <!-- Поле для выбора даты дедлайна -->
+                    <input
+                        type="date"
+                        v-model="newTaskDeadline"
+                        class="form-control"
+                    />
+                    <br>
+
+                    <p class="mb-1">Ответственный:</p>
+                    <!-- Поле для выбора ответственного -->
+                    <select v-model="newTaskAssignedTo" class="form-control">
+                        <option v-for="member in boardMembers" :key="member.id" :value="member.id">
+                            [[ member.username ]]
+                        </option>
+                    </select>
+                    <br>
+
+                    <p class="mb-1">Статус задачи:</p>
+                    <!-- Поле для выбора приоритета -->
+                    <select v-model="newTaskStatus" id="status" name="status" class="form-control" required>
+                        <option value="in_progress" selected>В работе</option>
+                        <option value="urgent">Срочно</option>
+                        <option value="overdue">Просрочено</option>
+                        <option value="completed">Выполнено</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="button" class="btn btn-primary" @click="addNewTask">Добавить</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </section>
 {% endblock %}

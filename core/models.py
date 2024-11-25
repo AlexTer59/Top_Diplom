@@ -50,6 +50,19 @@ class List(models.Model):
 
 
 class Task(models.Model):
+    # Используем переменные для статусов
+    STATUS_IN_PROGRESS = 'in_progress'
+    STATUS_URGENT = 'urgent'
+    STATUS_OVERDUE = 'overdue'
+    STATUS_COMPLETED = 'completed'
+
+    STATUS_CHOICES = (
+        (STATUS_IN_PROGRESS, 'В работе'),
+        (STATUS_URGENT, 'Срочно'),
+        (STATUS_OVERDUE, 'Просрочено'),
+        (STATUS_COMPLETED, 'Выполнено'),
+    )
+
     title = models.CharField(max_length=255,
                              verbose_name="Название задачи")
     description = models.TextField(blank=True,
@@ -63,11 +76,17 @@ class Task(models.Model):
                              on_delete=models.CASCADE,
                              related_name='list_tasks',
                              verbose_name="Список")
-    position = models.PositiveIntegerField(default=0, verbose_name="Позиция")
-    due_date = models.DateTimeField(blank=True,
-                                    null=True,
-                                    default=timezone.now() + timedelta(weeks=1),
-                                    verbose_name="Срок выполнения")
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default=STATUS_IN_PROGRESS,
+    )
+
+    due_date = models.DateField(blank=True,
+                                null=True,
+                                default=timezone.now() + timedelta(weeks=1),
+                                verbose_name="Срок выполнения"
+    )
     created_at = models.DateTimeField(auto_now_add=True,
                                       verbose_name="Дата создания")
     updated_at = models.DateTimeField(auto_now=True,
@@ -75,6 +94,11 @@ class Task(models.Model):
     labels = models.JSONField(default=dict,
                               blank=True,
                               verbose_name="Метки")
+    created_by = models.ForeignKey(Profile,
+                                   on_delete=models.CASCADE,
+                                   related_name="created_tasks",
+                                   verbose_name="Назначивший")
+
     assigned_to = models.ForeignKey(Profile,
                                     on_delete=models.SET_NULL,
                                     null=True,

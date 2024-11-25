@@ -7,6 +7,8 @@ main {
 .kanban-board {
     background-color: #f8f9fa;
     padding: 20px 0;
+    height: 90vh; /* Ограничиваем высоту всей доски */
+    overflow-y: auto; /* Прокрутка по вертикали */
 }
 
 .container-fluid {
@@ -14,16 +16,14 @@ main {
     max-width: 100%; /* Ограничиваем максимальной шириной */
 }
 
+
 /* Обертка для канбан-доски с возможностью прокрутки */
 .kanban-board-wrapper {
     display: flex;
     gap: 20px;
-    overflow-x: auto; /* Горизонтальная прокрутка для доски */
-    overflow-y: auto; /* Без вертикальной прокрутки */
-    padding-top: 30px; /* Для отступа от шапки */
-    max-width: 100%; /* Ограничиваем максимальной шириной экрана */
-    justify-content: center; /* Центрируем содержимое по горизонтали */
-    flex-wrap: nowrap; /* Убираем перенос колонок на новую строку */
+    padding-top: 30px;
+    justify-content: center;
+    flex-wrap: nowrap;
 }
 
 /* Полоса прокрутки для доски */
@@ -55,6 +55,7 @@ main {
     align-items: start;
 }
 
+
 /* Стили карточек и их содержимого */
 .card {
     margin-bottom: 20px;
@@ -83,8 +84,25 @@ main {
 }
 
 .card-body {
-    max-height: 400px;
-    overflow-y: auto; /* Прокрутка задач в колонке */
+    max-height: none; /* Убираем ограничение высоты */
+    overflow: visible; /* Убираем прокрутку */
+}
+
+.task-in-progress {
+    background-color: #ffffff; /* Белый цвет для задач в процессе */
+}
+
+.task-urgent {
+    background-color: #f5c76b; /* Желтый цвет для срочных задач */
+
+}
+
+.task-overdue {
+    background-color: #de7777; /* Светло-красный для просроченных задач */
+}
+
+.task-completed {
+    background-color: #a8d08d; /* Зеленый для завершенных задач */
 }
 
 .task-title {

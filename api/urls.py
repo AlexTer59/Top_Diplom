@@ -25,9 +25,10 @@ urlpatterns = [
 
     # ================ My tasks views ==================
     path('lists/<int:list_id>/tasks/', get_tasks_by_list, name='get_tasks_by_list'),
+    path('boards/<int:board_id>/lists/<int:list_id>/tasks/create', create_task, name='create_task'),
 
     # ================ Default tasks CRUD views ==================
-    path('tasks/create/', create_task, name='create_task'),
+
     path('tasks/<int:task_id>/update/', update_task, name='update_task'),
     path('tasks/<int:task_id>/delete/', delete_task, name='delete_task'),
 

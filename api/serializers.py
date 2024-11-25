@@ -1,7 +1,10 @@
+from datetime import timedelta, datetime
+
 from rest_framework import serializers
 from django.utils.timezone import localtime
 from django.db import models
 from core.models import Board, List, Task
+from django.utils import timezone
 from user.models import Profile
 from user.serializers import *
 
@@ -27,48 +30,68 @@ class BoardSerializer(serializers.Serializer):
         instance.save()
         return instance
 
+
+def get_default_due_date():
+    return (timezone.now() + timedelta(days=7)).date()
+
 class TaskSerializer(serializers.Serializer):
+    STATUS_IN_PROGRESS = Task.STATUS_IN_PROGRESS
+    STATUS_URGENT = Task.STATUS_URGENT
+    STATUS_OVERDUE = Task.STATUS_OVERDUE
+    STATUS_COMPLETED = Task.STATUS_COMPLETED
+
     id = serializers.IntegerField(read_only=True)
     title = serializers.CharField(max_length=255)
     description = serializers.CharField(allow_blank=True)
-    board = serializers.IntegerField(source='board.id')  # Ссылаемся на ID доски
-    list = serializers.IntegerField(source='list.id')  # Ссылаемся на ID списка
-    position = serializers.IntegerField(default=0)
-    # due_date = serializers.DateTimeField(required=False, allow_null=True)
-    due_date = serializers.SerializerMethodField()
+    board = serializers.PrimaryKeyRelatedField(queryset=Board.objects.all())
+    list = serializers.PrimaryKeyRelatedField(queryset=List.objects.all())
+    status = serializers.ChoiceField(choices=Task.STATUS_CHOICES)
+    due_date = serializers.DateField(required=False, allow_null=True, default=get_default_due_date)
     created_at = serializers.DateTimeField(read_only=True)
     updated_at = serializers.DateTimeField(read_only=True)
     labels = serializers.JSONField(required=False, default=dict)
-    assigned_to = ProfileSerializer()  # Сериализуем объект Profile
+    assigned_to = serializers.PrimaryKeyRelatedField(queryset=Profile.objects.all(), required=False, allow_null=True)
 
-    def get_due_date(self, obj):
-        return localtime(obj.due_date).strftime('%d-%m-%Y %H:%M')
+    assigned_to_username = serializers.CharField(source='assigned_to.user.username', read_only=True)
+    assigned_to_avatar = serializers.SerializerMethodField()
+    created_by_username = serializers.CharField(source='created_by.user.username', read_only=True)
+
+
+    def get_assigned_to_avatar(self, obj):
+        if obj.assigned_to and obj.assigned_to.avatar:
+            return obj.assigned_to.avatar.url
+        return None
+
+    def to_internal_value(self, data):
+        # Если due_date отсутствует или равно null, назначаем дефолтное значение
+        if 'due_date' not in data or data['due_date'] is None:
+            data['due_date'] = get_default_due_date()
+
+        return super().to_internal_value(data)
+
 
     def create(self, validated_data):
-        # Создаем задачу
+        # Получаем текущего пользователя через request
+        created_by = self.context['request'].user.profile  # Получаем профиль текущего пользователя
         assigned_to_data = validated_data.pop('assigned_to', None)
-        task = Task.objects.create(**validated_data)
 
-        # Если есть данные о пользователе, то привязываем к задаче
+        # Создаем задачу и передаем created_by
+        task = Task.objects.create(created_by=created_by, **validated_data)
+
         if assigned_to_data:
-            profile = Profile.objects.get(id=assigned_to_data['id'])
-            task.assigned_to = profile
+            task.assigned_to = assigned_to_data  # Это теперь объект Profile
             task.save()
 
         return task
 
     def update(self, instance, validated_data):
-        # Обновляем задачу
         assigned_to_data = validated_data.pop('assigned_to', None)
 
-        # Обновляем поля задачи
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
 
-        # Если есть данные о пользователе, обновляем исполнителя
         if assigned_to_data:
-            profile = Profile.objects.get(id=assigned_to_data['id'])
-            instance.assigned_to = profile
+            instance.assigned_to = assigned_to_data  # Это теперь объект Profile
 
         instance.save()
         return instance

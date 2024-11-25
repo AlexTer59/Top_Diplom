@@ -70,12 +70,12 @@ def check_list_access(profile, board_or_list, permission_type):
     raise PermissionDenied("У вас нет доступа к этому списку.")
 
 
-def check_task_access(profile, list_or_task, permission_type):
+def check_task_access(profile, task, permission_type):
     """
-    Проверяет права доступа к задаче или возможной задаче.
+    Проверяет права доступа к задаче.
 
     :param profile: Профиль пользователя.
-    :param list_or_task: Объект задачи или списка (при создании задачи).
+    :param task: Объект задачи.
     :param permission_type: Тип операции ("C", "R", "U", "D").
     :raises PermissionDenied: Если доступ запрещен.
     """
@@ -83,14 +83,7 @@ def check_task_access(profile, list_or_task, permission_type):
         raise ValueError("Недопустимый тип операции. Используйте 'C', 'R', 'U' или 'D'.")
 
     # Извлекаем доску
-    if isinstance(list_or_task, Task):
-        board = list_or_task.board
-        task = list_or_task
-    elif isinstance(list_or_task, List):
-        board = list_or_task.board
-        task = None
-    else:
-        raise ValueError("list_or_task должен быть объектом List или Task.")
+    board = task.board
 
     # Полный доступ у создателя доски
     if board.owner == profile:
@@ -98,15 +91,17 @@ def check_task_access(profile, list_or_task, permission_type):
 
     # Проверка прав для участников доски
     if profile in board.members.all():
-        if permission_type in ("R", "C"):
-            # Участник может читать любые задачи и создавать задачи
+        if permission_type == "R":
+            return  # Участник может читать все задачи
+
+        if permission_type == "U" or permission_type == "D":
+            # Участник может редактировать или удалять только свои задачи
+            if task.assigned_to == profile or task.created_by == profile:
+                return  # Участник может редактировать или удалять свою задачу
+            raise PermissionDenied("Вы не можете редактировать или удалять чужие задачи.")
+
+        # Статус можно менять как для задач, так и для тех, что поставлены участнику
+        if permission_type == "U" and task.assigned_to == profile:
             return
 
-        if task:  # Для операций "U" или "D" с задачами
-            if task.assigned_to == profile:
-                return  # Участник может изменять или удалять только свои задачи
-
-            raise PermissionDenied("Вы не можете изменять или удалять чужие задачи.")
-
-    # Если пользователь не участник и не владелец, доступ запрещен
     raise PermissionDenied("У вас нет доступа к этой задаче.")

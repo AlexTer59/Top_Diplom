@@ -205,24 +205,33 @@ def get_tasks_by_list(request, list_id):
 
 # ==================== CRUD Task =====================
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def list_tasks(request):
-    """Получение всех задач"""
-    tasks = Task.objects.all()
-    serializer = TaskSerializer(tasks, many=True)
-    return Response(serializer.data)
-
-
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def create_task(request):
-    """Создание новой задачи"""
-    serializer = TaskSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+def create_task(request, board_id, list_id):
+    try:
+        """Создание новой задачи"""
+        list_instance = get_object_or_404(List, id=list_id)
+        board_instance = get_object_or_404(Board, id=board_id)
+        check_task_access(request.user.profile, list_instance, 'C')
+
+        data = request.data.copy()
+        data['board'] = board_instance.id
+        data['list'] = list_instance.id
+
+        serializer = TaskSerializer(data=data, context={'request': request})
+
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    except PermissionDenied as e:
+        return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
+    except Exception as e:
+        # Обработка других ошибок
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['PUT'])
@@ -234,7 +243,7 @@ def update_task(request, task_id):
     except Task.DoesNotExist:
         return Response({'error': 'Task not found'}, status=status.HTTP_404_NOT_FOUND)
 
-    serializer = TaskSerializer(task_instance, data=request.data, partial=True)
+    serializer = TaskSerializer(task_instance, data=request.data, partial=True, context={'request': request})
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data)
