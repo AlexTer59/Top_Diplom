@@ -39,12 +39,24 @@ h3 {
     background-color: #f8f9fa; /* Легкий фон при наведении */
 }
 
-.bi-trash-fill {
-    transition: color 0.3s ease, transform 0.3s ease; /* Эффект наведения на корзину */
+.help-text {
+    font-size: 10px;
 }
 
-.bi-trash-fill:hover {
-    color: #ff6b6b; /* Подсветка красным при наведении */
+.delete-board, .edit-board {
+    color: gray;
+    opacity: 0.7;
+    cursor: pointer;
+    transition: color 0.3s ease, transform 0.3s ease, opacity 0.3s ease;; /* Эффект наведения на корзину */
+}
+
+.edit-board:hover {
+    color: var(--blue); /* Подсветка красным при наведении */
+    transform: scale(1.2); /* Увеличение при наведении */
+}
+
+.delete-board:hover {
+    color: red; /* Подсветка красным при наведении */
     transform: scale(1.2); /* Увеличение при наведении */
 }
 
@@ -70,7 +82,7 @@ h3 {
 }
 
 /* Кнопка "Создать доску" */
-.btn-primary {
+.create-btn {
     background-color: #3076f9;
     border-color: #3076f9;
     color: white;
@@ -80,7 +92,7 @@ h3 {
     transition: background-color 0.3s;
 }
 
-.btn-primary:hover {
+.create-btn:hover {
     background-color: #2569d4;
     border-color: #2569d4;
 }

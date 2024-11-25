@@ -10,7 +10,7 @@ class BoardSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     name = serializers.CharField(max_length=255)
     description = serializers.CharField(allow_blank=True)
-    owner = ProfileSerializer()
+    owner = serializers.PrimaryKeyRelatedField(queryset=Profile.objects.all())
     members = serializers.PrimaryKeyRelatedField(queryset=Profile.objects.all(), many=True)
 
     def create(self, validated_data):

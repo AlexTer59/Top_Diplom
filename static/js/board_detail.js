@@ -142,6 +142,7 @@ new Vue({
                     const index = this.lists.findIndex(list => list.id === this.editListId); // Найдем индекс элемента
                     if (index !== -1) {
                         this.lists.splice(index, 1); // Удаляем элемент по индексу
+                        this.$set(this, 'lists', [...this.lists]);
                     }
                     this.closeEditListPopup();
                 } catch (error) {
@@ -163,6 +164,7 @@ new Vue({
             const modal = new bootstrap.Modal(document.getElementById('editListModal'));
             this.newListName = list.name;
             this.editListId = list.id;
+
             modal.show(); // Явно вызываем Bootstrap метод для открытия окна
         },
 

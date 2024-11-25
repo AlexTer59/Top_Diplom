@@ -17,18 +17,21 @@
             <h3 class="text-center">Создатель</h3>
             <div class="list-group">
                 <div v-if="ownedBoards.length > 0">
-                    <a v-for="board in ownedBoards" :key="board.id" v-if="board.id" :href="`/boards/${board.id}/`"
+                    <a v-for="board in ownedBoards" :key="board.id" :href="`/boards/${board.id}/`"
                         class="list-group-item d-flex justify-content-between align-items-center board-link">
                         [[ board.name ]]
-                        <i class="bi bi-trash-fill text-danger" @mouseover="hoverDelete = board.id"
-                           @mouseleave="hoverDelete = null" @click="deleteBoard(board.id)"
-                           :style="{ opacity: hoverDelete === board.id ? 1 : 0.7, cursor: 'pointer' }"></i>
+
+                        <!-- Контейнер для иконок -->
+                        <div class="icon-container d-flex gap-2 align-items-center">
+                            <i class="bi bi-pencil edit-icon edit-board" @click.stop.prevent="openEditBoardPopup(board)"></i>
+                            <i class="bi bi-trash-fill delete-board" @click.stop.prevent="deleteBoard(board.id)"></i>
+                        </div>
                     </a>
                 </div>
-                <p v-else class="text-center">Здесь пусто.</p>
+                <p v-else class="text-center text-muted">Здесь пусто.</p>
             </div>
             <div class="text-center mt-4">
-                <button class="btn btn-primary btn-lg" @click="openCreateBoard">
+                <button class="create-btn btn btn-primary btn-lg" @click="openCreateBoardPopup">
                     <i class="bi bi-plus-circle"></i> Создать доску
                 </button>
             </div>
@@ -49,11 +52,108 @@
                         [[ board.name ]]
                     </a>
                 </div>
-                <p v-else class="text-center">Здесь пусто.</p>
+                <p v-else class="text-center text-muted">Здесь пусто.</p>
             </div>
         </div>
     </div>
+
+    <!-- Модальное окно для редактирования списка -->
+    <div class="modal fade" id="editBoardModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Редактировать доску</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Поле для названия доски -->
+                    <p class="mb-1">Название доски:</p>
+                    <input
+                        type="text"
+                        v-model="newBoardName"
+                        class="form-control"
+                        placeholder="Введите название доски"
+                    />
+                    <br>
+                    <!-- Поле для описания доски -->
+                    <p class="mb-1">Описание доски:</p>
+                    <textarea
+                        v-model="newBoardDescription"
+                        class="form-control"
+                        rows="3"
+                        placeholder="Введите описание доски"
+                    ></textarea>
+                    <br>
+                    <!-- Поле для выбора пользователей -->
+                    <p class="mb-1">Пользователи:</p>
+                    <select v-model="selectedUsers" multiple class="form-control">
+                        <option v-for="user in availableUsers" :key="user.id" :value="user.id">
+                            [[ user.user.username ]]
+                        </option>
+                    </select>
+                    <p class="text-muted help-text mt-2">*Удерживайте “Control“ (или “Command“ на Mac), чтобы выбрать несколько значений.</p>
+                </div>
+                <div class="modal-footer justify-content-between">
+                    <button type="button" class="btn btn-danger" @click="deleteBoard">Удалить</button>
+                    <div class="safe-btns">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                        <button type="button" class="btn btn-primary" @click="editBoard">Сохранить</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно для создания списка -->
+    <div class="modal fade" id="createBoardModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Создать доску</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Поле для названия доски -->
+                    <p class="mb-1">Название доски:</p>
+                    <input
+                        type="text"
+                        v-model="newBoardName"
+                        class="form-control"
+                        placeholder="Введите название доски"
+                    />
+                    <br>
+                    <!-- Поле для описания доски -->
+                    <p class="mb-1">Описание доски:</p>
+                    <textarea
+                        v-model="newBoardDescription"
+                        class="form-control"
+                        rows="3"
+                        placeholder="Введите описание доски"
+                    ></textarea>
+                    <br>
+                    <!-- Поле для выбора пользователей -->
+                    <p class="mb-1">Пользователи:</p>
+                    <select v-model="selectedUsers" multiple class="form-control">
+                        <option v-for="user in availableUsers" :key="user.id" :value="user.id">
+                            [[ user.user.username ]]
+                        </option>
+                    </select>
+                    <p class="text-muted help-text mt-2">*Удерживайте “Control“ (или “Command“ на Mac), чтобы выбрать несколько значений.</p>
+                </div>
+                <div class="modal-footer justify-content-end">
+                    <div class="safe-btns">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                        <button type="button" class="btn btn-primary" @click="createBoard">Сохранить</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
+
+
+
 {% endblock %}
 
 {% block script %}

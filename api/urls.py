@@ -7,10 +7,10 @@ urlpatterns = [
     path('boards/owned/', owned_boards, name='owned_boards'),
     path('boards/shared/', shared_boards, name='shared_boards'),
     path('boards/<int:board_id>/', detail_board, name='detail_board'),
+    path('boards/<int:board_id>/edit/', edit_board, name='detail_board'),
 
     # ================ Default boards CRUD views ==================
     path('boards/create/', create_board, name='create_board'),
-    path('boards/<int:board_id>/update/', update_board, name='update_board'),
     path('boards/<int:board_id>/delete/', delete_board, name='delete_board'),
 
     # ================ My lists views ==================
@@ -30,6 +30,7 @@ urlpatterns = [
     path('tasks/create/', create_task, name='create_task'),
     path('tasks/<int:task_id>/update/', update_task, name='update_task'),
     path('tasks/<int:task_id>/delete/', delete_task, name='delete_task'),
+
 
 ]
 

@@ -6,7 +6,8 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-from core.models import Board, List, Task
+from core.models import *
+from user.models import *
 from .serializers import BoardSerializer, ListSerializer, TaskSerializer
 from .utils import *
 
@@ -54,16 +55,19 @@ def detail_board(request, board_id):
 @permission_classes([IsAuthenticated])
 def create_board(request):
     """Создание новой доски"""
-    serializer = BoardSerializer(data=request.data)
+    profile = request.user.profile
+    data = request.data.copy()
+    data['owner'] = profile.id  # Передаем только ID профиля
+    serializer = BoardSerializer(data=data)
     if serializer.is_valid():
-        serializer.save()
+        serializer.save(owner=profile)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
-def update_board(request, board_id):
+def edit_board(request, board_id):
     """Обновление списка по ID"""
     try:
         board_instance = get_object_or_404(Board, id=board_id)
@@ -247,3 +251,5 @@ def delete_task(request, task_id):
         return Response(status=status.HTTP_204_NO_CONTENT)
     except Task.DoesNotExist:
         return Response({'error': 'Task not found'}, status=status.HTTP_404_NOT_FOUND)
+
+
