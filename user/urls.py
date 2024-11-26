@@ -4,7 +4,10 @@ from django.urls import path
 
 
 urlpatterns = [
-    path('login', login, name='login'),
+    path('profiles/login', login, name='login'),
+    path('profiles/logout', logout, name='logout'),
+    path('profiles/register', register, name='register'),
+
     path('profiles/boards/<int:board_id>/', get_profiles_by_board, name='get_profiles_by_board'),
 
     path('profiles/', get_profiles, name='get_profiles'),

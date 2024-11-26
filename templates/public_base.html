@@ -53,16 +53,16 @@
                             <li><a class="dropdown-item" href="/profile">Профиль</a></li>
                             <li><a class="dropdown-item" href="/boards">Мои доски</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="/logout">Выход</a></li>
+                            <li><a class="dropdown-item" href="{% url 'logout' %}">Выход</a></li>
                         </ul>
                     </li>
                     {% else %}
                     <!-- Неавторизованный пользователь -->
                     <li class="nav-item">
-                        <a class="btn btn-primary mx-2" href="/signup">Регистрация</a>
+                        <a class="btn btn-primary mx-2" href="{% url 'register' %}">Регистрация</a>
                     </li>
                     <li class="nav-item">
-                        <a class="btn btn-light" href="/login">Войти</a>
+                        <a class="btn btn-light" href="{% url 'login' %}">Войти</a>
                     </li>
                     {% endif %}
                 </ul>

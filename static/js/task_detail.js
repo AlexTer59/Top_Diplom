@@ -128,7 +128,7 @@ new Vue({
                     }
 
                     // Редирект на страницу со списком задач или другую страницу
-                    window.location.href = `${this.baseUrl}boards/${this.boardId}/`; // пример редиректа
+                    window.location.href = `${this.baseUrl}boards/${this.boardId}/`;
 
                 } catch (error) {
                     console.error(error.message);
@@ -138,7 +138,7 @@ new Vue({
         },
 
         backToBoard() {
-            window.location.href = `${this.baseUrl}boards/${this.boardId}/`; // пример редиректа
+            window.location.href = `${this.baseUrl}boards/${this.boardId}/`;
         },
 
         resetTaskForm() {

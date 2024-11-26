@@ -1,0 +1,33 @@
+{% extends 'public_base.html' %}
+{% load static %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'css/register.css' %}">
+{% endblock styles %}
+
+{% block title %}Регистрация{% endblock %}
+
+{% block content %}
+<section class="register-section py-5">
+    <div class="container-fluid d-flex justify-content-center align-items-center" style="min-height: 50vh;">
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white text-center">
+                    <h4 class="mb-0">Регистрация</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{% url 'register' %}" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {{ form.as_p }}  <!-- Django форма автоматически отображает поля -->
+
+                        <button type="submit" class="btn btn-primary w-100">Зарегистрироваться</button>
+                    </form>
+                </div>
+                <div class="card-footer text-center">
+                    <p class="mb-0">Уже есть аккаунт? <a href="{% url 'login' %}">Войти</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
