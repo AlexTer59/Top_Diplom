@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
-from core.models import Board
+from core.models import Board, Task, List
 
 
 def main(request):
@@ -45,3 +45,27 @@ def board_detail(request, board_id):
 
     # Возвращаем страницу с деталями доски
     return render(request, 'board_detail.html', context)
+
+@login_required
+def task_detail(request, board_id, list_id, task_id):
+    board = get_object_or_404(Board, id=board_id)
+    task = get_object_or_404(Task, id=task_id)
+    list = get_object_or_404(List, id=list_id)
+
+    # Получаем профиль текущего пользователя
+    profile = request.user.profile
+
+    # Проверяем, является ли пользователь владельцем или участником доски
+    if board.owner != profile and not board.members.filter(id=profile.id).exists():
+        raise PermissionDenied("У вас нет прав для просмотра этой доски.")
+
+    context = {
+        'board': board,
+        'board_id': board_id,
+        'task': task,
+        'task_id': task_id,
+        'list': list,
+        'list_id': list_id,
+    }
+
+    return render(request, 'task_detail.html', context)

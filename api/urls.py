@@ -26,13 +26,13 @@ urlpatterns = [
     # ================ My tasks views ==================
     path('lists/<int:list_id>/tasks/', get_tasks_by_list, name='get_tasks_by_list'),
     path('boards/<int:board_id>/lists/<int:list_id>/tasks/create', create_task, name='create_task'),
-
-    # ================ Default tasks CRUD views ==================
-
-    path('tasks/<int:task_id>/update/', update_task, name='update_task'),
-    path('tasks/<int:task_id>/delete/', delete_task, name='delete_task'),
+    path('boards/<int:board_id>/lists/<int:list_id>/tasks/<int:task_id>/', get_task, name='get_task_from_board'),
+    path('boards/<int:board_id>/lists/<int:list_id>/tasks/<int:task_id>/edit/', edit_task, name='edit_task_from_board'),
+    path('boards/<int:board_id>/lists/<int:list_id>/tasks/<int:task_id>/delete/', delete_task, name='delete_task_from_board'),
 
 
+    # ======================= task notes views ========================
+    path('boards/<int:board_id>/lists/<int:list_id>/tasks/<int:task_id>/notes', get_notes, name='get_notes_from_task')
 ]
 
 

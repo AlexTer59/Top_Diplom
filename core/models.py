@@ -49,6 +49,8 @@ class List(models.Model):
         return self.name
 
 
+
+
 class Task(models.Model):
     # Используем переменные для статусов
     STATUS_IN_PROGRESS = 'in_progress'
@@ -115,7 +117,44 @@ class Task(models.Model):
         return self.title
 
 
+class TaskNote(models.Model):
+    note = models.TextField(max_length=1024, verbose_name='Заметка')
+    task = models.ForeignKey(Task,
+                             blank=True,
+                             null=True,
+                             on_delete=models.CASCADE,
+                             related_name='task_note',
+                             verbose_name='Задача')
+    created_at = models.DateTimeField(auto_now_add=True)
+    profile = models.ForeignKey(Profile,
+                                related_name='profile_notes',
+                                on_delete=models.CASCADE,
+                                verbose_name='Профиль')
 
+    def __str__(self):
+        return f'{self.note[:15]}...'
+
+    class Meta:
+        verbose_name = 'Заметка'
+        verbose_name_plural = 'Заметки'
+
+
+class TaskNoteLike(models.Model):
+    note = models.ForeignKey(TaskNote,
+                             on_delete=models.CASCADE,
+                             related_name='note_likes',
+                             )
+    profile = models.ForeignKey(Profile,
+                                on_delete=models.CASCADE,
+                                related_name='profile_likes')
+    created_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.profile.user.username} лайкнул заметку "{self.note.note[:20]}..."'
+
+    class Meta:
+        verbose_name = 'Лайк'
+        verbose_name_plural = 'Лайки'
 
 
 

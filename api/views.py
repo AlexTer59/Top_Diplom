@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from core.models import *
 from user.models import *
-from .serializers import BoardSerializer, ListSerializer, TaskSerializer
+from .serializers import BoardSerializer, ListSerializer, TaskSerializer, TaskNoteSerializer
 from .utils import *
 
 
@@ -233,32 +233,75 @@ def create_task(request, board_id, list_id):
         # Обработка других ошибок
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_task(request, board_id, list_id, task_id):
+    try:
+        """Получение задачи"""
+        task_instance = get_object_or_404(Task, id=task_id)
+        check_task_access(request.user.profile, task_instance, 'R')
+
+        serializer = TaskSerializer(task_instance)
+        return Response(serializer.data)
+
+    except PermissionDenied as e:
+        return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
+    except Exception as e:
+        # Обработка других ошибок
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
-def update_task(request, task_id):
+def edit_task(request, board_id, list_id, task_id):
     """Обновление задачи по ID"""
     try:
-        task_instance = Task.objects.get(id=task_id)
-    except Task.DoesNotExist:
-        return Response({'error': 'Task not found'}, status=status.HTTP_404_NOT_FOUND)
+        task_instance = get_object_or_404(Task, id=task_id)
+        check_task_access(request.user.profile, task_instance, 'U')
+        serializer = TaskSerializer(task_instance, data=request.data, partial=True, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    serializer = TaskSerializer(task_instance, data=request.data, partial=True, context={'request': request})
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except PermissionDenied as e:
+        return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
+    except Exception as e:
+    # Обработка других ошибок
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['DELETE'])
 @permission_classes([IsAuthenticated])
-def delete_task(request, task_id):
+def delete_task(request, board_id, list_id, task_id):
     """Удаление списка по ID"""
     try:
-        task_instance = Task.objects.get(id=task_id)
+        task_instance = get_object_or_404(Task, id=task_id)
+        check_task_access(request.user.profile, task_instance, 'D')
         task_instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-    except Task.DoesNotExist:
-        return Response({'error': 'Task not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    except PermissionDenied as e:
+        return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
+    except Exception as e:
+    # Обработка других ошибок
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_notes(request, board_id, list_id, task_id):
+    """Получение заметок по задаче"""
+    try:
+        notes = TaskNote.objects.filter(task__id=task_id)
+        task_instance = get_object_or_404(Task, id=task_id)
+        check_task_access(request.user.profile, task_instance, 'R')
+        serializer = TaskNoteSerializer(notes, many=True, context={'request': request})
+        return Response({'notes': serializer.data })
+    except PermissionDenied as e:
+        return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
+    except Exception as e:
+        # Обработка других ошибок
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)

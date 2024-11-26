@@ -1,7 +1,7 @@
 {% extends 'app_base.html' %}
 {% load static %}
 
-{% block title %}Доска{% endblock %}
+{% block title %}{{ board.name }}{% endblock %}
 
 {% block styles %}
 <link rel="stylesheet" href="{% static 'css/board_detail.css' %}">
@@ -33,13 +33,15 @@
                                     <div class="d-flex justify-content-between align-items-center">
                                         <span class="task-deadline text-muted">Срок:<br>[[ task.due_date ]]</span>
                                         <div class="task-user d-flex align-items-center">
-                                            <img :src="task.assigned_to.avatar || 'https://via.placeholder.com/40'"
+                                            <img :src="task.assigned_to_avatar || 'https://via.placeholder.com/40'"
                                                  alt="Avatar" class="rounded-circle me-2" width="40" height="40">
                                             <span class="text-muted">[[ task.assigned_to_username ]]</span>
                                         </div>
                                     </div>
                                 </div>
-                                <button class="btn btn-outline-primary w-100">Детали</button>
+                                <a class="btn btn-outline-primary w-100"
+                                    :href="`lists/${task.list}/tasks/${task.id}/`">Детали
+                                </a>
                             </div>
                         </div>
                         <p v-else class="text-center text-muted">Здесь ничего нет</p> <!-- Сообщение, если задач нет -->

@@ -3,7 +3,7 @@ from datetime import timedelta, datetime
 from rest_framework import serializers
 from django.utils.timezone import localtime
 from django.db import models
-from core.models import Board, List, Task
+from core.models import Board, List, Task, TaskNote, TaskNoteLike
 from django.utils import timezone
 from user.models import Profile
 from user.serializers import *
@@ -44,18 +44,33 @@ class TaskSerializer(serializers.Serializer):
     title = serializers.CharField(max_length=255)
     description = serializers.CharField(allow_blank=True)
     board = serializers.PrimaryKeyRelatedField(queryset=Board.objects.all())
+    board_name = serializers.CharField(source='board.name', read_only=True)
     list = serializers.PrimaryKeyRelatedField(queryset=List.objects.all())
+    list_name = serializers.CharField(source='list.name', read_only=True)
     status = serializers.ChoiceField(choices=Task.STATUS_CHOICES)
+    status_name = serializers.SerializerMethodField(read_only=True)
     due_date = serializers.DateField(required=False, allow_null=True, default=get_default_due_date)
     created_at = serializers.DateTimeField(read_only=True)
     updated_at = serializers.DateTimeField(read_only=True)
+    created_at_datetime = serializers.SerializerMethodField(read_only=True)
+    updated_at_datetime = serializers.SerializerMethodField(read_only=True)
     labels = serializers.JSONField(required=False, default=dict)
     assigned_to = serializers.PrimaryKeyRelatedField(queryset=Profile.objects.all(), required=False, allow_null=True)
+    created_by_id = serializers.CharField(source='created_by.user.id', read_only=True)
 
     assigned_to_username = serializers.CharField(source='assigned_to.user.username', read_only=True)
     assigned_to_avatar = serializers.SerializerMethodField()
     created_by_username = serializers.CharField(source='created_by.user.username', read_only=True)
 
+
+    def get_created_at_datetime(self, obj):
+        return localtime(obj.created_at).strftime('%d-%m-%Y %H:%M')
+
+    def get_updated_at_datetime(self, obj):
+        return localtime(obj.updated_at).strftime('%d-%m-%Y %H:%M')
+
+    def get_status_name(self, obj):
+        return obj.get_status_display()
 
     def get_assigned_to_avatar(self, obj):
         if obj.assigned_to and obj.assigned_to.avatar:
@@ -132,3 +147,24 @@ class ListSerializer(serializers.Serializer):
         instance.save()  # Сохраняем обновленные данные
 
         return instance
+
+class TaskNoteSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    note = serializers.CharField(max_length=1024)
+    profile = serializers.CharField(source='profile.user.username', read_only=True)
+    created_at = serializers.SerializerMethodField()
+    likes_count = serializers.SerializerMethodField()
+    is_liked = serializers.SerializerMethodField()
+
+    def get_created_at(self, obj):
+        return localtime(obj.created_at).strftime('%d-%m-%Y %H:%M')
+
+    def get_likes_count(self, obj):
+        return obj.note_likes.count()
+
+    def get_is_liked(self, obj):
+        profile = self.context['request'].user.profile
+        return TaskNoteLike.objects.filter(profile=profile, note=obj).exists()
+
+    def create(self, validated_data):
+        return TaskNote.objects.create(**validated_data)
