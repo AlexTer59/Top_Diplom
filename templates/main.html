@@ -9,7 +9,7 @@
     <div class="container">
         <h1 class="display-4 outline">TaskIT – ваш инструмент для управления проектами</h1>
         <p class="lead outline">Управляйте задачами, проектами и командой на единой платформе</p>
-        <a href="/signup" class="btn btn-primary btn-lg">Попробовать бесплатно</a>
+        <a href="#" class="btn btn-primary btn-lg">Попробовать бесплатно</a>
     </div>
 </section>
 
@@ -61,35 +61,28 @@
 <section class="pricing-section text-center py-5 bg-light">
     <div class="container">
         <h2 class="mb-4">Выберите подходящий тариф</h2>
-        <p class="mb-5">Бесплатный доступ на 30 дней ко всем функциям</p>
         <div class="row">
-            <div class="col-md-4 mb-4">
+            <div class="col-md-6 mb-4">
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">Базовый</h5>
-                        <p class="card-text">Идеально для небольших команд</p>
-                        <h3 class="card-price">320 ₽/мес</h3>
-                        <a href="#" class="btn btn-primary">Приобрести</a>
+                        <p class="card-text">Имеет ограниченный функционал</p>
+                        <h3 class="card-price">Бесплатно</h3>
+                        <a href="#" class="btn btn-primary">Начать пользоваться</a>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4 mb-4">
+            <div class="col-md-6 mb-4">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Профессиональный</h5>
-                        <p class="card-text">Все функции для средних команд</p>
-                        <h3 class="card-price">400 ₽/мес</h3>
-                        <a href="#" class="btn btn-primary">Приобрести</a>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 mb-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Корпоративный</h5>
-                        <p class="card-text">Лучшее для крупных компаний</p>
-                        <h3 class="card-price">360 ₽/мес</h3>
-                        <a href="#" class="btn btn-primary">Приобрести</a>
+                        <h5 class="card-title">Премиум</h5>
+                        <p class="card-text">Полный функционал приложения</p>
+                        <h3 class="card-price">350 ₽/мес</h3>
+                        {% if user.is_authenticated %}
+                            <a href="#" class="btn btn-primary">Приобрести</a>
+                        {% else %}
+                            <a href="{% url 'login' %}" class="btn btn-primary">Приобрести</a>
+                        {% endif %}
                     </div>
                 </div>
             </div>

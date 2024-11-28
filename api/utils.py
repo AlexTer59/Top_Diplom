@@ -91,8 +91,8 @@ def check_task_access(profile, task, permission_type):
 
     # Проверка прав для участников доски
     if profile in board.members.all():
-        if permission_type == "R":
-            return  # Участник может читать все задачи
+        if permission_type in ('R', 'C'):
+            return  # Участник может читать все задачи и создавать
 
         if permission_type == "U" or permission_type == "D":
             # Участник может редактировать или удалять только свои задачи
