@@ -1,0 +1,115 @@
+main {
+    background-color: #f5f9fc;
+}
+
+.pricing-section {
+    background-color: #f5f9fc;
+    padding: 60px 20px;
+}
+
+.pricing-title {
+    text-align: center;
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 30px;
+}
+
+.pricing-toggle {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.pricing-card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+    overflow: hidden;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* Позволяет карточкам быть равной высоты */
+}
+
+.pricing-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.pricing-card-header {
+    background-color: #007bff;
+    color: #fff;
+    padding: 20px;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.pricing-card-body {
+    padding: 20px;
+    text-align: center;
+    flex-grow: 1; /* Расширяет тело карточки для равной высоты */
+}
+
+.pricing-card-body .price {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #28a745;
+    margin-bottom: 10px;
+    min-height: 80px; /* Задает минимальную высоту для выравнивания блока price */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.pricing-card-body .old-price {
+    text-decoration: line-through;
+    color: #888;
+    font-size: 1rem;
+}
+
+.pricing-card-body .features {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+}
+
+.pricing-card-body .features li {
+    font-size: 18px;
+    margin-bottom: 10px;
+    color: var(--blue);
+}
+
+.pricing-card-footer {
+    text-align: center;
+    padding: 15px;
+    background-color: #f7f7f7;
+}
+
+.pricing-card-footer .btn {
+    font-size: 1rem;
+    font-weight: bold;
+    padding: 10px 20px;
+}
+
+.highlighted {
+    border: 2px solid #ffc107;
+}
+
+.highlighted .pricing-card-header {
+    background-color: #ffc107;
+}
+
+/* Добавление стилей для равной высоты карточек */
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: stretch;
+}
+
+.col-md-3 {
+    display: flex;
+    flex-direction: column;
+}

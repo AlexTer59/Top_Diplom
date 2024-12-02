@@ -3,6 +3,10 @@
 
 {% block title %}Добро пожаловать в TaskIT{% endblock %}
 
+{% block styles %}
+<link rel="stylesheet" href="{% static 'css/main.css' %}">
+{% endblock %}
+
 {% block content %}
 <!-- Hero Section -->
 <section class="hero-section text-center text-white">
@@ -16,7 +20,7 @@
 <!-- Features Section -->
 <section class="features-section py-5 bg-light">
     <div class="container">
-        <h2 class="text-center mb-5">Что делает TaskIT уникальным?</h2>
+        <h2 class="text-center mb-5" id="features">Что делает TaskIT уникальным?</h2>
         <div class="row text-center">
             <div class="col-md-4 mb-4">
                 <i class="bi bi-kanban display-4 text-primary"></i>
@@ -47,9 +51,11 @@
             </div>
             <div class="col-md-6">
                 <h3 class="feature-title">Управление задачами</h3>
-                <p>Создавайте задачи, устанавливайте приоритеты и назначайте ответственных. Все данные доступны в режиме реального времени.</p>
+                <p>Создавайте задачи, устанавливайте приоритеты и назначайте ответственных. Все данные доступны в режиме
+                    реального времени.</p>
                 <h3 class="feature-title">Проектные доски</h3>
-                <p>Используйте канбан-доски или диаграммы Ганта, чтобы всегда быть в курсе текущего состояния проекта.</p>
+                <p>Используйте канбан-доски или диаграммы Ганта, чтобы всегда быть в курсе текущего состояния
+                    проекта.</p>
                 <h3 class="feature-title">Совместная работа</h3>
                 <p>Обсуждайте задачи, делитесь файлами и поддерживайте связь с помощью встроенного чата.</p>
             </div>
@@ -63,26 +69,37 @@
         <h2 class="mb-4">Выберите подходящий тариф</h2>
         <div class="row">
             <div class="col-md-6 mb-4">
-                <div class="card">
-                    <div class="card-body">
+                <div class="pricing-card">
+                    <div class="card-header">
                         <h5 class="card-title">Базовый</h5>
-                        <p class="card-text">Имеет ограниченный функционал</p>
-                        <h3 class="card-price">Бесплатно</h3>
-                        <a href="#" class="btn btn-primary">Начать пользоваться</a>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text mb-0 text-muted"><i class="bi bi-dash-circle"></i> Имеет ограниченный функционал</p>
+                        <div class="price">
+                            <h3 class="card-price mb-0">Бесплатно</h3>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <a href="{% url 'boards' %}" class="btn btn-primary w-100">Начать пользоваться</a>
                     </div>
                 </div>
             </div>
             <div class="col-md-6 mb-4">
-                <div class="card">
-                    <div class="card-body">
+                <div class="pricing-card">
+                    <div class="card-header">
                         <h5 class="card-title">Премиум</h5>
-                        <p class="card-text">Полный функционал приложения</p>
-                        <h3 class="card-price">350 ₽/мес</h3>
-                        {% if user.is_authenticated %}
-                            <a href="#" class="btn btn-primary">Приобрести</a>
-                        {% else %}
-                            <a href="{% url 'login' %}" class="btn btn-primary">Приобрести</a>
-                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text mb-0"><i class="bi bi-check2-circle"></i> Полный функционал приложения</p>
+                        <div class="price">
+                            <h3 class="card-price mb-0">{{ current_price }} ₽/мес</h3>
+                            {% if old_price %}
+                            <span class="old-price d-block mb-2">{{ old_price }}₽</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <a href="{% url 'prices_detail' %}" class="btn btn-primary w-100">Приобрести</a>
                     </div>
                 </div>
             </div>

@@ -3,7 +3,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.contrib.auth import authenticate, get_user_model
 
-from user.models import Profile
+from user.models import Profile, Subscription
 
 
 class LoginForm(forms.Form):
@@ -87,12 +87,14 @@ class RegistrationForm(forms.Form):
             email=self.cleaned_data['email'],
             password=self.cleaned_data['password1'],
         )
-        print(self.cleaned_data['avatar'])
         # Создание профиля
-        Profile.objects.create(
-            user=user,
-            avatar=self.cleaned_data.get('avatar', None),
-            bio='',  # Можно оставить пустым или добавить текст
+        profile = Profile.objects.create(user=user
+                                         ,avatar=self.cleaned_data.get('avatar', None),
+                                         bio='',
+                                         )
+        Subscription.objects.create(
+            profile=profile,
         )
+
 
         return user

@@ -1,0 +1,51 @@
+{% extends "public_base.html" %}
+{% load static %}
+
+{% block title %}Тарифные планы{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'css/price_detail.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="pricing-section">
+    <h1 class="pricing-title">Тарифные планы</h1>
+    <div class="row justify-content-center">
+        {% for tier, details in tiers.items %}
+        <div class="col-md-3">
+            <div class="pricing-card {% if details.is_highlighted %}highlighted{% endif %}">
+                <div class="pricing-card-header">
+                    {{ details.name }}
+                    {% if details.is_highlighted %}
+                        <p class="small text-white">Самый популярный</p>
+                    {% endif %}
+                </div>
+                <div class="pricing-card-body">
+                    <div class="price">
+                        <span>{{ details.price }}₽ / месяц</span>
+                        {% if details.old_price %}
+                        <span class="old-price">{{ details.old_price }}₽</span>
+                        {% endif %}
+                    </div>
+                    <ul class="features text-start">
+                        {% for feature in details.features %}
+                        <li><i class="bi bi-check2-circle"></i> {{ feature }}</li>
+                        {% endfor %}
+                        {% for disregard in details.disregards %}
+                        <li class="text-muted"><i class="bi bi-dash-circle"></i> {{ disregard }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="pricing-card-footer">
+                    {% if tier == 'base' %}
+                    <a href="{% url 'boards' %}" class="btn btn-primary">Начать использовать</a>
+                    {% elif tier == 'premium' %}
+                    <a href="#" class="btn btn-primary">Приобрести</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

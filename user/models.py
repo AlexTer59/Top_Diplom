@@ -70,34 +70,22 @@ class Subscription(models.Model):
         """
         Проверяет, активна ли подписка.
         """
-        return self.expires_at is None or self.expires_at > now()
+        return self.tier == self.PREMIUM and (self.expires_at is None or self.expires_at > now())
 
-    def can_downgrade(self):
-        """
-        Проверяет, можно ли переключиться с премиума на стандарт.
-        """
-        if self.tier == self.PREMIUM and self.expires_at and self.expires_at > now():
-            return False  # Премиум активен, переключение запрещено
-        return True
-
-    def activate_premium(self, duration_days=30):
-        """
-        Активирует или продлевает премиум подписку.
-        """
-        self.tier = self.PREMIUM
-        if self.expires_at and self.expires_at > now():
-            self.expires_at += timedelta(days=duration_days)
-        else:
+    def upgrade_to_premium(self, duration_days=30):
+        if self.subscription_type == 'base':
+            self.subscription_type = 'premium'
             self.expires_at = now() + timedelta(days=duration_days)
+        elif self.subscription_type == 'premium':
+            if self.expires_at and self.expires_at > now():
+                # Продление активной подписки: прибавляем к дате окончания
+                self.expires_at += timedelta(days=duration_days)
+            else:
+                # Если подписка истекла, начинаем с текущей даты
+                self.expires_at = now() + timedelta(days=duration_days)
         self.save()
 
-    def activate_base(self):
-        """
-        Активирует базовую подписку, если это возможно.
-        """
-        if self.can_downgrade():
-            self.tier = self.BASE
-            self.expires_at = None
-            self.save()
-        else:
-            raise ValueError("Нельзя переключиться на базовый тариф, пока активен премиум.")
+    def reset_to_base(self):
+        self.subscription_type = 'base'
+        self.expires_at = None
+        self.save()

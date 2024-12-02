@@ -3,10 +3,20 @@ from django.shortcuts import render, get_object_or_404
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from core.models import Board, Task, List
+from django.views.generic import TemplateView
 
 
 def main(request):
-    return render(request, 'main.html')
+    current_price = 499
+    old_price = 599
+
+    context = {
+        'current_price': current_price,
+        'old_price': old_price,
+
+    }
+
+    return render(request, 'main.html', context=context)
 
 @login_required
 def my_boards(request):
@@ -69,3 +79,41 @@ def task_detail(request, board_id, list_id, task_id):
     }
 
     return render(request, 'task_detail.html', context)
+
+
+class PricesDetailView(TemplateView):
+    template_name = "price_detail.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['tiers'] = {
+            'base': {
+                'name': 'Базовый',
+                'price': '0',
+                'old_price': None,
+                'features': [
+                    'Доступ к базовым функциям',
+                ],
+                'disregards': [
+                    'Отсутствуют диаграммы Ганта',
+                    'До 4 человек в доске',
+                    'Создание до 3 досок',
+                ],
+                'is_highlighted': False,
+            },
+            'premium': {
+                'name': 'Премиум',
+                'price': '499',
+                'old_price': '599',
+                'features': [
+                    'Все базовые функции',
+                    'Неограниченное количество досок',
+                    'Диаграммы Ганта',
+                    'Неограниченное количество участников в доске',
+                ],
+                'disregards': [
+                ],
+                'is_highlighted': False,
+            },
+        }
+        return context
