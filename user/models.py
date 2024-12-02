@@ -2,21 +2,62 @@ from django.db import models
 from django.contrib.auth.models import User
 from datetime import timedelta
 from django.utils.timezone import now
+import os
 
 # Create your models here.
 
+def avatar_upload_path(instance, filename):
+    """
+    Формирует путь для сохранения аватара, используя username пользователя.
+    """
+    ext = filename.split('.')[-1]  # Получаем расширение файла
+    filename = f"{instance.user.username}.{ext}"  # Формируем новое имя файла
+    return os.path.join('avatars/', filename)  # Путь для сохранения
+
+
 class Profile(models.Model):
-    user = models.OneToOneField(User,
-                                on_delete=models.CASCADE,
-                                related_name='profile',
-                                verbose_name='Пользователь')
-    avatar = models.ImageField(upload_to='avatars/',
-                               blank=True,
-                               null=True,
-                               verbose_name="Аватар")
-    bio = models.TextField(blank=True,
-                           null=True,
-                           verbose_name='О себе')
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='profile',
+        verbose_name='Пользователь'
+    )
+    avatar = models.ImageField(
+        upload_to=avatar_upload_path,
+        blank=True,
+        null=True,
+        verbose_name="Аватар"
+    )
+    bio = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name='О себе'
+    )
+    first_name = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+        verbose_name='Имя'
+    )
+    last_name = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+        verbose_name='Фамилия'
+    )
+    birth_date = models.DateField(
+        blank=True,
+        null=True,
+        verbose_name='Дата рождения'
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата создания'
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name='Дата обновления'
+    )
 
     class Meta:
         verbose_name = 'Профиль'
