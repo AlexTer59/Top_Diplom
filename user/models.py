@@ -66,6 +66,15 @@ class Profile(models.Model):
     def __str__(self):
         return self.user.username
 
+    def save(self, *args, **kwargs):
+        # Удаляем старый файл, если аватар изменился
+        if self.pk:  # Проверяем, существует ли объект
+            old_avatar = Profile.objects.filter(pk=self.pk).first().avatar
+            if old_avatar and old_avatar.name != self.avatar.name:
+                old_avatar_path = old_avatar.path
+                if os.path.exists(old_avatar_path):
+                    os.remove(old_avatar_path)
+        super().save(*args, **kwargs)
 
 
 class Subscription(models.Model):

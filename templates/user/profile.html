@@ -42,12 +42,16 @@
                 <div class="col">
                     <h4>Мои доски</h4>
                     <div class="list-group">
-                        {% for board in boards %}
-                            <a href="{% url 'board_detail' board.id %}" class="list-group-item list-group-item-action">
-                                {{ board.name }}
-                                <span class="badge bg-primary float-end">{{ board.tasks_count }} задач</span>
-                            </a>
-                        {% endfor %}
+                        {% if boards %}
+                            {% for board in boards %}
+                                <a href="{% url 'board_detail' board.id %}" class="list-group-item list-group-item-action">
+                                    {{ board.name }}
+                                    <span class="badge bg-primary float-end">{{ board.tasks_count }} задач</span>
+                                </a>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted text-center">Здесь ничего нет</p>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -57,12 +61,17 @@
                 <div class="col">
                     <h4>Мои задачи</h4>
                     <div class="list-group">
-                        {% for task in tasks %}
-                            <a href="{% url 'task_detail' task.board.id task.list.id task.id %}" class="list-group-item list-group-item-action">
-                                {{ task.title }}
-                                <span class="badge bg-success float-end">{{ task.status|title }}</span>
-                            </a>
-                        {% endfor %}
+                        {% if tasks %}
+                            {% for task in tasks %}
+                                <a href="{% url 'task_detail' task.board.id task.list.id task.id %}" class="list-group-item list-group-item-action">
+                                    {{ task.title }}
+                                    <span class="badge bg-success float-end">{{ task.status|title }}</span>
+                                </a>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted text-center">Здесь ничего нет</p>
+                        {% endif %}
+
                     </div>
                 </div>
             </div>

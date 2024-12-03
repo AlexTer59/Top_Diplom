@@ -37,6 +37,7 @@ new Vue({
                 const response = await fetch(`${this.baseUrl}users/profiles/${this.profileId}/api/`);
                 this.profile = await response.json();
             } catch (error) {
+                alert(error.message)
                 console.error('Ошибка загрузки профиля:', error);
             }
         },
@@ -76,7 +77,14 @@ new Vue({
                 if (response.ok) {
                     const updatedProfile = await response.json()
                     this.profile = updatedProfile; // Обновляем профиль
+
+                    // Добавляем уникальный параметр к URL аватарки
+                    if (this.profile.avatar) {
+                        this.profile.avatar += `?t=${new Date().getTime()}`;
+                    }
+
                     this.closeEditProfilePopup();
+
 
                 } else {
                     throw new Error("Ошибка при обновлении профиля!");

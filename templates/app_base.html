@@ -32,7 +32,7 @@
         <div class="dropdown mx-4">
             <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button"
                data-bs-toggle="dropdown">
-                <img src="{% if user.profile.avatar %}{{ user.profile.avatar.url }}{% else %}https://via.placeholder.com/40{% endif %}"
+                <img src="{% if user.profile.avatar %}{{ user.profile.avatar.url }}{% else %}{% static 'img/default_avatar.png' %}{% endif %}"
                      alt="Avatar"
                      class="avatar-img rounded-circle me-2"
                      width="40"
