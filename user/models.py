@@ -130,3 +130,10 @@ class Subscription(models.Model):
         self.subscription_type = 'base'
         self.expires_at = None
         self.save()
+
+    class Meta:
+        verbose_name = 'Подписка'
+        verbose_name_plural = 'Подписки'
+
+    def __str__(self):
+        return f'{self.profile.user.username} -> {self.tier}'

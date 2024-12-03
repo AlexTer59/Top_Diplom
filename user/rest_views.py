@@ -29,7 +29,7 @@ def get_profiles_by_board(request, board_id):
         serializer = ProfileSerializer(profiles, many=True)
         return Response(serializer.data)
     except PermissionDenied as e:
-            return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
+        return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
     except Exception as e:
         # Обработка других ошибок
 
@@ -40,18 +40,33 @@ def get_profiles_by_board(request, board_id):
 @permission_classes([IsAuthenticated])
 def get_profile_detail(request, profile_id):
     try:
-        profile = Profile.objects.get(id=profile_id)
-    except Profile.DoesNotExist:
-        return Response({'error': 'Profile not found'}, status=status.HTTP_404_NOT_FOUND)
+        profile = get_object_or_404(Profile, id=profile_id)
+        serializer = ProfileSerializer(profile)
+        return Response(serializer.data)
+    except PermissionDenied as e:
+        return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
+    except Exception as e:
+        # Обработка других ошибок
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-    serializer = ProfileSerializer(profile)
-    return Response(serializer.data)
 
-@api_view(['POST'])
-def create_profile(request):
-    print(request.data)
-    serializer = ProfileSerializer(data=request.data)
-    if serializer.is_valid():
-        user = serializer.save()
-        return Response(serializer.data, status=HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def edit_profile(request, profile_id):
+    try:
+        profile = get_object_or_404(Profile, id=profile_id)
+        check_profile_access(request.user.profile, profile, 'U')
+        serializer = ProfileSerializer(profile, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except PermissionDenied as e:
+        return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
+
+    except Exception as e:
+        # Обработка других ошибок
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+

@@ -141,6 +141,10 @@ main {
     padding: 100px 20px; /* Отступы внутри секции */
 }
 
+.avatar-img {
+    object-fit: cover; /* Обеспечивает сохранение пропорций, но заполняет контейнер */
+}
+
 .feature-title {
     color: #2e6df7;
 }

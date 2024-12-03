@@ -2,7 +2,7 @@ from django.db import models
 from rest_framework.exceptions import ValidationError
 from django.utils import timezone
 from datetime import timedelta
-
+from django.utils.timezone import now
 from user.models import Profile
 
 
@@ -90,7 +90,8 @@ class Task(models.Model):
                                 verbose_name="Срок выполнения"
     )
     created_at = models.DateTimeField(auto_now_add=True,
-                                      verbose_name="Дата создания")
+                                      verbose_name="Дата создания",
+                                      )
     updated_at = models.DateTimeField(auto_now=True,
                                       verbose_name="Дата обновления")
     labels = models.JSONField(default=dict,
@@ -99,7 +100,7 @@ class Task(models.Model):
     created_by = models.ForeignKey(Profile,
                                    on_delete=models.CASCADE,
                                    related_name="created_tasks",
-                                   verbose_name="Назначивший")
+                                   verbose_name="Назначивший",)
 
     assigned_to = models.ForeignKey(Profile,
                                     on_delete=models.SET_NULL,

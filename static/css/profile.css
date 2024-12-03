@@ -1,0 +1,5 @@
+.bio-text {
+    max-width: 100%; /* Ширина ограничена родительским контейнером */
+    margin: 0 auto;
+    word-wrap: break-word;
+}
