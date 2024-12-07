@@ -14,12 +14,27 @@ new Vue({
         selectedUsers: [],
         availableUsers: [],
         editBoardId: null,
+        isBaseSubscription: null,
+        isBoardLimitReached: false,
+        maxMembers: 50,
     },
     mounted() {
         // Загрузка данных о досках при монтировании компонента
+        this.checkSubscription();
         this.getBoards();
         this.getUsers();
     },
+
+    watch: {
+        // Следим за изменениями в selectedUsers
+        selectedUsers(newValue, oldValue) {
+            if (newValue.length > this.maxMembers) {
+                this.selectedUsers = newValue.slice(0, this.maxMembers);
+                alert(`Вы можете выбрать не более ${this.maxMembers} участников.`);
+            }
+        },
+    },
+
     methods: {
         async getBoards() {
             try {
@@ -45,7 +60,48 @@ new Vue({
             }
         },
 
+        async checkSubscription() {
+            try {
+                const response = await fetch(`${this.baseUrl}users/profiles/subscription/get/api/`);
+                const subscription = await response.json();
+
+                if (subscription.tier === 'base') {
+                    this.isBaseSubscription = true;
+                    this.maxMembers = 3;
+                } else {
+                    this.isBaseSubscription = false;
+                }
+
+                this.checkBoardLimit()
+
+            } catch (error) {
+                console.error('Ошибка при проверке подписки:', error);
+            }
+        },
+
+        checkBoardLimit() {
+            if (this.isBaseSubscription) {
+                this.isBoardLimitReached = this.ownedBoards.length >= 3;
+            } else {
+                this.isBoardLimitReached = false;
+            }
+        },
+
+        checkUserLimit() {
+            console.log('проверяю')
+            if (this.selectedUsers.length > this.maxMembers) {
+                // Если количество выбранных пользователей больше лимита, удаляем последний выбранный
+                this.selectedUsers = this.selectedUsers.slice(0, this.maxMembers);
+                alert(`Вы можете выбрать не более ${this.maxMembers} участников.`);
+            }
+        },
+
         async createBoard() {
+             if (this.isBoardLimitReached) {
+                // Если лимит достигнут, не позволяем создавать доску
+                return;
+            }
+
             if (!this.newBoardName.trim()) {
                 alert('Введите название доски');
                 return;
@@ -71,6 +127,9 @@ new Vue({
 
                 const newBoard = await response.json();
                 this.ownedBoards.push(newBoard); // Добавляем новую доску в список
+
+                this.checkBoardLimit();
+
                 this.closeCreateBoardPopup(); // Закрываем модальное окно
                 this.resetBoardPopup();  // Очищаем модальное окно
             } catch (error) {
@@ -107,6 +166,9 @@ new Vue({
                             this.$set(this, 'ownedBoards', []);
                          }
                     }
+
+                    this.checkBoardLimit();
+
                     if (this.editBoardId) {
                         this.closeEditBoardPopup()
                     } else {
@@ -170,11 +232,13 @@ new Vue({
 
         openCreateBoardPopup(board) {
             const modal = new bootstrap.Modal(document.getElementById('createBoardModal'));
+            console.log(this.maxMembers)
             modal.show(); // Явно вызываем Bootstrap метод для открытия окна
         },
 
         closeCreateBoardPopup() {
             const modal = bootstrap.Modal.getInstance(document.getElementById('createBoardModal'));
+
             modal.hide(); // Явно вызываем Bootstrap метод для скрытия окна
             this.resetBoardPopup();
         },
@@ -196,8 +260,6 @@ new Vue({
         openCreateBoard() {
             window.location.href = `${this.baseUrl}create-board/`; // Перенаправление на страницу для создания доски
         },
-
-
     },
 
 });

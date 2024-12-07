@@ -9,7 +9,18 @@
 
 {% block content %}
 <div id="app" class="container py-5">
-    <h1 class="text-center mb-5">Мои доски</h1>
+    <h1 class="text-center mb-3">Мои доски</h1>
+    {% if is_base_sub %}
+        <div class="notification alert alert-info d-flex align-items-center gap-3">
+            <!-- Увеличенная иконка Bootstrap Icons -->
+            <i class="bi bi-info-circle"></i>
+            <!-- Текст уведомления -->
+            <div>
+                <h4>У вас стандартная подписка</h4>
+                <p>Вы можете создать максимум 3 доски и добавить не более 3 участников на каждую доску.</p>
+            </div>
+        </div>
+    {% endif %}
 
     <div class="row justify-content-center">
         <!-- Колонка: Мои доски (Создатель) -->
@@ -31,7 +42,10 @@
                 <p v-else class="text-center text-muted">Здесь пусто.</p>
             </div>
             <div class="text-center mt-4">
-                <button class="create-btn btn btn-primary btn-lg" @click="openCreateBoardPopup">
+                <button
+                    :disabled="isBoardLimitReached"
+                    class="create-btn btn btn-primary btn-lg"
+                    @click="openCreateBoardPopup">
                     <i class="bi bi-plus-circle"></i> Создать доску
                 </button>
             </div>
@@ -86,7 +100,7 @@
                     <br>
                     <!-- Поле для выбора пользователей -->
                     <p class="mb-1">Пользователи:</p>
-                    <select v-model="selectedUsers" multiple class="form-control">
+                    <select v-model="selectedUsers" multiple class="form-control" @input="checkUserLimit">
                         <option v-for="user in availableUsers" :key="user.id" :value="user.id">
                             [[ user.username ]]
                         </option>

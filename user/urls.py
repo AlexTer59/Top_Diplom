@@ -13,5 +13,6 @@ urlpatterns = [
 
     path('profiles/', get_profiles, name='get_profiles'),
     path('profiles/<int:profile_id>/api/', get_profile_detail, name='get_profile_detail'),
-    path('profiles/<int:profile_id>/api/edit', edit_profile, name='edit_profile'),
+    path('profiles/<int:profile_id>/api/edit/', edit_profile, name='edit_profile'),
+    path('profiles/subscription/get/api/', get_subscription, name='get_subscription')
 ]

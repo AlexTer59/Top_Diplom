@@ -55,14 +55,19 @@ def detail_board(request, board_id):
 @permission_classes([IsAuthenticated])
 def create_board(request):
     """Создание новой доски"""
-    profile = request.user.profile
-    data = request.data.copy()
-    data['owner'] = profile.id  # Передаем только ID профиля
-    serializer = BoardSerializer(data=data)
-    if serializer.is_valid():
-        serializer.save(owner=profile)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        profile = request.user.profile
+        data = request.data.copy()
+        data['owner'] = profile.id  # Передаем только ID профиля
+        serializer = BoardSerializer(data=data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save(owner=profile)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except PermissionDenied as e:
+        return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['PUT'])

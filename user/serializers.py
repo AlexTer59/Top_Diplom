@@ -3,7 +3,11 @@ from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from user.models import Profile
 
-
+class SubscriptionSerializer(serializers.Serializer):
+    tier = serializers.CharField()
+    expires_at = serializers.DateTimeField()
+    created_at = serializers.DateTimeField()
+    updated_at = serializers.DateTimeField()
 
 class ProfileSerializer(serializers.Serializer):
     id = serializers.IntegerField()  # ID профиля
@@ -16,6 +20,7 @@ class ProfileSerializer(serializers.Serializer):
     bio = serializers.CharField(required=False, allow_blank=True)
     created_at = serializers.DateTimeField(read_only=True)
     updated_at = serializers.DateTimeField(read_only=True)
+    subscription = SubscriptionSerializer(read_only=True)
 
     def update(self, instance, validated_data):
         # Обновляем данные пользователя, только email
@@ -29,3 +34,4 @@ class ProfileSerializer(serializers.Serializer):
             setattr(instance, attr, value)
         instance.save()
         return instance
+

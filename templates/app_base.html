@@ -23,14 +23,14 @@
             <button class="btn btn-dark mx-3" id="sidebarToggle" aria-label="Открыть меню">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <a class="navbar-brand" href="/boards">Task<span style="color: #ffdd57;">IT</span></a>
+            <a class="navbar-brand" href="{% url 'main' %}">Task<span style="color: orange;">IT</span></a>
         </div>
 
 
         <!-- Юзернейм с аватаркой -->
         {% if user.is_authenticated %}
         <div class="dropdown mx-4">
-            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button"
+            <a class="nav-link dropdown-toggle d-flex align-items-center" role="button"
                data-bs-toggle="dropdown">
                 <img src="{% if user.profile.avatar %}{{ user.profile.avatar.url }}{% else %}{% static 'img/default_avatar.png' %}{% endif %}"
                      alt="Avatar"
@@ -40,7 +40,7 @@
                 {{ user.username }}
             </a>
             <ul class="dropdown-menu dropdown-menu-end">
-                <li><a class="dropdown-item" href="/profile">Профиль</a></li>
+                <li><a class="dropdown-item" href="{% url 'profile_detail' user.profile.id %}">Профиль</a></li>
                 <li><a class="dropdown-item" href="{% url 'boards' %}">Мои доски</a></li>
                 <li>
                     <hr class="dropdown-divider">
@@ -56,15 +56,19 @@
 <div id="sidebar" class="bg-dark text-white p-3 position-fixed top-0 start-0 vh-100">
     <button class="btn btn-close btn-close-white ms-auto" id="sidebarClose"></button>
     <ul class="sidebar-menu list-unstyled mt-4">
-        <li><a href="/boards" class="text-decoration-none d-block py-2"><i class="bi bi-kanban"></i> Мои доски</a></li>
-        <li><a href="/profile" class="text-decoration-none d-block py-2"><i class="bi bi-person"></i> Профиль</a></li>
-        <li><a href="/colleagues" class="text-decoration-none d-block py-2"><i class="bi bi-people"></i> Коллеги</a></li>
-        <li><a href="/create-board" class="text-decoration-none d-block py-2"><i class="bi bi-plus-circle"></i> Создать доску</a></li>
-        <li><a href="/recent-changes" class="text-decoration-none d-block py-2"><i class="bi bi-clock-history"></i> Последние изменения</a></li>
-        <li><a href="/chat" class="text-decoration-none d-block py-2"><i class="bi bi-chat-dots"></i> Чат</a></li>
-        <li><a href="/tariff" class="text-decoration-none d-block py-2"><i class="bi bi-currency-exchange"></i> Текущий тариф: <span class="badge bg-light text-dark">Стандарт</span></a></li>
-        <li><a href="/pricing" class="text-decoration-none d-block py-2"><i class="bi bi-cash-stack"></i> Тарифы</a></li>
+        <li><p href="/tariff" class="text-decoration-none d-block py-2"><i class="bi bi-currency-exchange"></i> Текущий тариф: <span class="badge bg-light text-dark">{{ user.profile.subscription.get_tier_display }}</span></p></li>
+
+        <li><a href="{% url 'main' %}" class="text-decoration-none d-block py-2"><i class="bi bi-house-door"></i> Страница приветствия</a></li>
         <li><a href="{% url 'main' %}#features" class="text-decoration-none d-block py-2"><i class="bi bi-lightbulb"></i> Возможности</a></li>
+        <li><a href="{% url 'prices_detail' %}" class="text-decoration-none d-block py-2"><i class="bi bi-cash-stack"></i> Тарифы</a></li>
+        <li><a href="{% url 'profile_detail' user.profile.id %}" class="text-decoration-none d-block py-2"><i class="bi bi-person"></i> Профиль</a></li>
+
+        <li><a href="{% url 'boards' %}" class="text-decoration-none d-block py-2"><i class="bi bi-kanban"></i> Мои доски</a></li>
+        <li><a href="#" class="text-decoration-none d-block py-2"><i class="bi bi-people"></i> Коллеги</a></li>
+        <li><a href="#" class="text-decoration-none d-block py-2"><i class="bi bi-clock-history"></i> Последние изменения</a></li>
+        <li><a href="#" class="text-decoration-none d-block py-2"><i class="bi bi-chat-dots"></i> Чат</a></li>
+
+
     </ul>
 </div>
 

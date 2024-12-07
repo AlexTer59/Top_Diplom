@@ -5,6 +5,9 @@ from django.db.models import Q
 from core.models import Board, Task, List
 from django.views.generic import TemplateView
 
+from user.models import Subscription
+from user.serializers import *
+
 
 def main(request):
     current_price = 499
@@ -21,15 +24,21 @@ def main(request):
 @login_required
 def my_boards(request):
     """Страница досок пользователя"""
+    profile = request.user.profile
+
     # Получаем доски, которые создал пользователь
-    owned_boards = Board.objects.filter(owner=request.user.profile)
+    owned_boards = Board.objects.filter(owner=profile)
 
     # Получаем доски, к которым пользователь был добавлен как участник
-    shared_boards = Board.objects.filter(members=request.user.profile)
+    shared_boards = Board.objects.filter(members=profile)
+
+    subscription = get_object_or_404(Subscription, profile=profile).tier
+    print(subscription)
 
     context = {
         'owned_boards': owned_boards,
         'shared_boards': shared_boards,
+        'is_base_sub': subscription == Subscription.BASE
     }
 
     return render(request, 'my_boards.html', context)

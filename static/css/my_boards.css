@@ -13,6 +13,11 @@ h3 {
     color: #333;
 }
 
+.notification i{
+    display: block;
+    font-size: 50px;
+}
+
 .text-center {
     text-align: center;
 }

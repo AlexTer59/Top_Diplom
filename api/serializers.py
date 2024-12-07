@@ -1,11 +1,14 @@
 from datetime import timedelta, datetime
 
+
 from rest_framework import serializers
 from django.utils.timezone import localtime
 from django.db import models
+from rest_framework.exceptions import ValidationError
+
 from core.models import Board, List, Task, TaskNote, TaskNoteLike
 from django.utils import timezone
-from user.models import Profile
+from user.models import *
 from user.serializers import *
 
 
@@ -29,6 +32,33 @@ class BoardSerializer(serializers.Serializer):
         instance.members.set(members)
         instance.save()
         return instance
+
+    # Проверка общего количества досок для пользователя
+    def validate(self, attrs):
+        # Получаем текущего пользователя из контекста
+        profile = self.context['request'].user.profile
+        subscription = Subscription.objects.get(profile=profile)
+
+        # Проверка на количество досок, если подписка базовая
+        if subscription.tier == Subscription.BASE:
+            board_count = Board.objects.filter(owner=profile).count()
+            if board_count >= 3:
+                raise ValidationError("Вы не можете создать больше 3 досок с базовой подпиской.")
+
+        return attrs
+
+    # Проверка на количество участников (не более 3)
+    def validate_members(self, value):
+        # Получаем текущего пользователя из контекста
+        profile = self.context['request'].user.profile
+        subscription = Subscription.objects.get(profile=profile)
+
+        # Проверка количества участников для базовой подписки
+        if subscription.tier == Subscription.BASE:
+            if len(value) > 3:
+                raise ValidationError("Вы можете выбрать не более 3 участников с базовой подпиской.")
+
+        return value
 
 
 def get_default_due_date():
@@ -140,10 +170,6 @@ class ListSerializer(serializers.Serializer):
     def update(self, instance, validated_data):
         # Обновляем только разрешенные поля
         instance.name = validated_data.get('name', instance.name)
-
-        # Важное замечание: не изменяем 'position' по умолчанию, если только не требуется изменить порядок
-        # instance.position = validated_data.get('position', instance.position)  # Если хотите изменить position, раскомментируйте
-
         instance.save()  # Сохраняем обновленные данные
 
         return instance

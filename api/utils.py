@@ -16,7 +16,7 @@ def check_board_access(profile, board_instance, permission_type):
     if permission_type not in ("C", "R", "U", "D"):
         raise ValueError("Недопустимый тип операции. Используйте 'C', 'R', 'U' или 'D'.")
 
-    if isinstance(board_instance, Board):  # При создании списка передается объект доски
+    if isinstance(board_instance, Board):
         board = board_instance
     else:
         raise ValueError("board_instance должен быть объектом Board.")
