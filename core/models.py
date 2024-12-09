@@ -44,6 +44,14 @@ class List(models.Model):
     class Meta:
         verbose_name = 'Список'
         verbose_name_plural = 'Списки'
+        ordering = ['position']  # Сортируем списки по полю position
+
+    def save(self, *args, **kwargs):
+        if not self.position:
+            # Получаем максимальное значение position для данного board и увеличиваем на 1
+            max_position = List.objects.filter(board=self.board).aggregate(models.Max('position'))['position__max']
+            self.position = max_position + 1 if max_position is not None else 1  # если списков нет, то position = 1
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name

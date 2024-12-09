@@ -8,7 +8,7 @@
 {% endblock styles %}
 
 {% block content %}
-<section class="kanban-board py-5" id="app" data-board-id="{{ board_id }}" data-user-id="{{ user.profile.id }}">
+<section class="kanban-board py-5" id="app" data-board-id="{{ board_id }}" data-user-id="{{ user.profile.id }}" data-default-avatar="{% static 'img/default_avatar.png' %}">
     <div class="container-fluid px-3">
         <h1 class="text-center mb-5">[[ board.name ]]</h1>
         <!-- Колонки и задачи -->
@@ -33,7 +33,7 @@
                                     <div class="d-flex justify-content-between align-items-center">
                                         <span class="task-deadline text-muted">Срок:<br>[[ task.due_date ]]</span>
                                         <div class="task-user d-flex align-items-center">
-                                            <img :src="task.assigned_to_avatar || {% static 'img/default_avatar.png' %}"
+                                            <img :src="task.assigned_to_avatar || defaultAvatar"
                                                  alt="Avatar" class="avatar-img rounded-circle me-2" width="40" height="40">
                                             <span class="text-muted">[[ task.assigned_to_username ]]</span>
                                         </div>

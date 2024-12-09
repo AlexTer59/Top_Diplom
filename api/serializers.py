@@ -21,8 +21,15 @@ class BoardSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         members = validated_data.pop('members', [])
+
+        # Создание доски
         board = Board.objects.create(**validated_data)
         board.members.set(members)
+
+        # Создание дефолтных списков для новой доски
+        default_lists = ['TODO', 'Today', 'In Progress', 'Done', 'Archive']
+        for list_name in default_lists:
+            List.objects.create(board=board, name=list_name)
         return board
 
     def update(self, instance, validated_data):

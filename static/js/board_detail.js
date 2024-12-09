@@ -16,6 +16,8 @@ new Vue({
             lists: [],  // Массив для списков
             tasks: {},  // Массив задач для каждого списка
 
+            defaultAvatar: '',
+
             newListName: "", // Для имени нового списка
             editListId: null,
             isOwner: false,
@@ -32,6 +34,7 @@ new Vue({
     },
     mounted() {
         this.boardId = this.$el.getAttribute('data-board-id'); // Получаем boardId из data-атрибута только после монтирования
+        this.defaultAvatar = this.$el.getAttribute('data-default-avatar')
         this.fetchBoardData(); // Загружаем данные сразу при монтировании компонента
 
     },
