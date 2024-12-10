@@ -27,7 +27,7 @@ class BoardSerializer(serializers.Serializer):
         board.members.set(members)
 
         # Создание дефолтных списков для новой доски
-        default_lists = ['TODO', 'Today', 'In Progress', 'Done', 'Archive']
+        default_lists = ['Задачи', 'Сегодня', 'В процессе', 'Выполнено', 'Архив']
         for list_name in default_lists:
             List.objects.create(board=board, name=list_name)
         return board
@@ -82,10 +82,10 @@ class TaskSerializer(serializers.Serializer):
     description = serializers.CharField(allow_blank=True)
     board = serializers.PrimaryKeyRelatedField(queryset=Board.objects.all())
     board_name = serializers.CharField(source='board.name', read_only=True)
-    list = serializers.PrimaryKeyRelatedField(queryset=List.objects.all())
-    list_name = serializers.CharField(source='list.name', read_only=True)
-    status = serializers.ChoiceField(choices=Task.STATUS_CHOICES)
-    status_name = serializers.SerializerMethodField(read_only=True)
+    status = serializers.PrimaryKeyRelatedField(queryset=List.objects.all())
+    status_name = serializers.CharField(source='status.name', read_only=True)
+    is_urgent = serializers.BooleanField(default=False)
+    is_overdue = serializers.BooleanField(default=False)
     due_date = serializers.DateField(required=False, allow_null=True, default=get_default_due_date)
     created_at = serializers.DateTimeField(read_only=True)
     updated_at = serializers.DateTimeField(read_only=True)
@@ -100,14 +100,47 @@ class TaskSerializer(serializers.Serializer):
     created_by_username = serializers.CharField(source='created_by.user.username', read_only=True)
 
 
+    def validate(self, attrs):
+        # Проверяем, если задача просрочена
+        if 'due_date' in attrs and attrs['due_date'] and attrs['due_date'] < timezone.now().date():
+            attrs['is_overdue'] = True
+        return attrs
+
+    def create(self, validated_data):
+        # Получаем текущего пользователя через request
+        created_by = self.context['request'].user.profile  # Получаем профиль текущего пользователя
+        assigned_to_data = validated_data.pop('assigned_to', None)
+
+        # Создаем задачу и передаем created_by
+        task = Task.objects.create(created_by=created_by, **validated_data)
+
+        if assigned_to_data:
+            task.assigned_to = assigned_to_data
+            task.save()
+
+        task.check_overdue()
+
+        return task
+
+    def update(self, instance, validated_data):
+        assigned_to_data = validated_data.pop('assigned_to', None)
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        if assigned_to_data:
+            instance.assigned_to = assigned_to_data
+
+        instance.save()
+
+        instance.check_overdue()
+        return instance
+
     def get_created_at_datetime(self, obj):
         return localtime(obj.created_at).strftime('%d-%m-%Y %H:%M')
 
     def get_updated_at_datetime(self, obj):
         return localtime(obj.updated_at).strftime('%d-%m-%Y %H:%M')
-
-    def get_status_name(self, obj):
-        return obj.get_status_display()
 
     def get_assigned_to_avatar(self, obj):
         if obj.assigned_to and obj.assigned_to.avatar:
@@ -121,34 +154,6 @@ class TaskSerializer(serializers.Serializer):
 
         return super().to_internal_value(data)
 
-
-    def create(self, validated_data):
-        # Получаем текущего пользователя через request
-        created_by = self.context['request'].user.profile  # Получаем профиль текущего пользователя
-        assigned_to_data = validated_data.pop('assigned_to', None)
-
-        # Создаем задачу и передаем created_by
-        task = Task.objects.create(created_by=created_by, **validated_data)
-
-        if assigned_to_data:
-            task.assigned_to = assigned_to_data  # Это теперь объект Profile
-            task.save()
-
-        return task
-
-    def update(self, instance, validated_data):
-        assigned_to_data = validated_data.pop('assigned_to', None)
-
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-
-        if assigned_to_data:
-            instance.assigned_to = assigned_to_data  # Это теперь объект Profile
-
-        instance.save()
-        return instance
-
-
 class ListSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     name = serializers.CharField(max_length=255)
@@ -161,6 +166,10 @@ class ListSerializer(serializers.Serializer):
 
         # Получаем доску
         board = Board.objects.get(id=board_id)
+
+        # Проверяем, не создается ли список с именем "Архив"
+        if validated_data['name'].lower() == 'архив':
+            raise serializers.ValidationError("Нельзя создать список с именем 'Архив'")
 
         # Вычисляем максимальную позицию для этой доски
         max_position = List.objects.filter(board=board).aggregate(models.Max('position'))['position__max'] or 0

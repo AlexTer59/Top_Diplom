@@ -33,7 +33,6 @@ def my_boards(request):
     shared_boards = Board.objects.filter(members=profile)
 
     subscription = get_object_or_404(Subscription, profile=profile).tier
-    print(subscription)
 
     context = {
         'owned_boards': owned_boards,

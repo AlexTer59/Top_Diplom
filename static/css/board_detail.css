@@ -22,7 +22,7 @@ main {
     display: flex;
     gap: 20px;
     padding-top: 30px;
-    justify-content: center;
+    justify-content: start;
     flex-wrap: nowrap;
 }
 
@@ -42,7 +42,7 @@ main {
 
 /* Стили для каждой колонки */
 .kanban-column {
-    flex: 0 0 300px; /* Фиксированная ширина колонки */
+    flex: 0 0 350px; /* Фиксированная ширина колонки */
     display: flex;
     flex-direction: column;
 }
@@ -55,6 +55,23 @@ main {
     align-items: start;
 }
 
+/* Контейнер для описания доски */
+.board-description-container {
+    width: 30%; /* Ширина контейнера 30% */
+    margin: 0 auto; /* Центрируем контейнер по горизонтали */
+    padding: 10px;
+    border-radius: 8px;
+    text-align: center; /* Текст по центру */
+    margin-bottom: 20px;
+}
+
+/* Стиль для текста описания */
+.board-description {
+    font-size: 1rem;
+    color: #333;
+    word-wrap: break-word; /* Перенос слов */
+    overflow-wrap: break-word; /* Перенос длинных слов */
+}
 
 /* Стили карточек и их содержимого */
 .card {
@@ -78,9 +95,23 @@ main {
     transform: translateY(-50%); /* Для точного вертикального выравнивания */
 }
 
+/* Стили для стрелочек перемещения */
+.task-title-container i {
+    color: #6c757d; /* Серый цвет по умолчанию */
+    cursor: pointer;
+    font-size: 1.5rem; /* Размер иконки */
+    transition: color 0.3s ease; /* Плавное изменение цвета */
+}
+
+.task-title-container i:hover {
+    cursor: pointer;
+    color: var(--blue);
+}
+
 /* При наведении на иконку цвет меняется на белый */
-.edit-icon:hover {
+.edit-icon:hover  {
     color: #ffffff;
+
 }
 
 .card-body {
@@ -101,13 +132,15 @@ main {
     background-color: #de7777; /* Светло-красный для просроченных задач */
 }
 
-.task-completed {
-    background-color: #a8d08d; /* Зеленый для завершенных задач */
-}
-
+/* Стиль заголовка задачи */
 .task-title {
     font-size: 1rem;
     font-weight: bold;
+    word-wrap: break-word; /* Разрешаем перенос длинных слов */
+    white-space: normal; /* Разрешаем перенос строк */
+    overflow-wrap: break-word; /* Перенос длинных слов */
+    max-width: 100%; /* Ограничиваем ширину заголовка */
+    word-break: break-word; /* Обеспечивает перенос даже при отсутствии пробелов */
 }
 
 .task-deadline {
@@ -188,4 +221,3 @@ main {
 .popup .btn {
     width: 100px;
 }
-

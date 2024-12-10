@@ -9,27 +9,34 @@
 
 {% block content %}
 <section class="kanban-board py-5" id="app" data-board-id="{{ board_id }}" data-user-id="{{ user.profile.id }}" data-default-avatar="{% static 'img/default_avatar.png' %}">
-    <div class="container-fluid px-3">
-        <h1 class="text-center mb-5">[[ board.name ]]</h1>
+    <div class="container-fluid px-5">
+        <h1 class="text-center mb-2">[[ board.name ]]</h1>
+         <!-- Контейнер для описания доски -->
+        <div class="board-description-container text-center mb-2">
+            <p class="board-description">[[ board.description ]]</p>
+        </div>
+
         <!-- Колонки и задачи -->
         <div class="kanban-board-wrapper" v-if="lists.length > 0">
-            <div v-for="list in lists" :key="list.id" class="kanban-column">
+            <div v-for="list in lists" :key="list.id" class="kanban-column" :data-list-id="list.id">
                 <div class="card">
                     <div class="card-header text-white d-flex justify-content-center align-items-center position-relative">
                         <h4 class="mb-0">[[ list.name ]]</h4>
-                        <i v-if="isOwner" class="bi bi-pencil edit-icon position-absolute" @click="openEditListPopup(list)"></i>
+                        <i v-if="isOwner && list.name.toLowerCase() !== 'архив'" class="bi bi-pencil edit-icon position-absolute" @click="openEditListPopup(list)"></i>
                     </div>
                     <div class="card-body">
                         <div v-if="tasks[list.id] && tasks[list.id].length > 0">
                             <div v-for="task in tasks[list.id]" :key="task.id" class="task-card card mb-3"
                                  :class="{
-                                     'task-in-progress': task.status === 'in_progress',
-                                     'task-urgent': task.status === 'urgent',
-                                     'task-overdue': task.status === 'overdue',
-                                     'task-completed': task.status === 'completed'
+                                     'task-urgent': task.is_urgent === true,
+                                     'task-overdue': task.is_overdue === true,
                                  }">
                                 <div class="card-body">
-                                    <h6 class="task-title mb-4">[[ task.title ]]</h6>
+                                    <div class="task-title-container d-flex gap-2 justify-content-between align-items-center">
+                                        <i class="bi bi-arrow-left-circle move-left" @click="moveTask(task.id, list.id, 'back')"></i>
+                                        <h6 class="task-title mb-4">[[ task.title ]]</h6>
+                                        <i class="bi bi-arrow-right-circle move-right" @click="moveTask(task.id, list.id, 'forward')"></i>
+                                    </div>
                                     <div class="d-flex justify-content-between align-items-center">
                                         <span class="task-deadline text-muted">Срок:<br>[[ task.due_date ]]</span>
                                         <div class="task-user d-flex align-items-center">
@@ -169,14 +176,13 @@
                     </select>
                     <br>
 
-                    <p class="mb-1">Статус задачи:</p>
-                    <!-- Поле для выбора приоритета -->
-                    <select v-model="newTaskStatus" id="status" name="status" class="form-control" required>
-                        <option value="in_progress" selected>В работе</option>
-                        <option value="urgent">Срочно</option>
-                        <option value="overdue">Просрочено</option>
-                        <option value="completed">Выполнено</option>
-                    </select>
+
+                      <!-- Флажок для срочности -->
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" v-model="newTaskIsUrgent" id="urgentCheckbox" />
+                        <label class="form-check-label" for="urgentCheckbox">Отметить как срочную</label>
+                    </div>
+
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
@@ -191,4 +197,5 @@
 
 {% block script %}
 <script src="{% static 'js/board_detail.js' %}"></script>
+
 {% endblock script %}

@@ -31,6 +31,7 @@ urlpatterns = [
     path('boards/<int:board_id>/lists/<int:list_id>/tasks/<int:task_id>/delete/', delete_task, name='delete_task_from_board'),
 
 
+
     # ======================= task notes views ========================
     path('boards/<int:board_id>/lists/<int:list_id>/tasks/<int:task_id>/notes', get_notes, name='get_notes_from_task')
 ]

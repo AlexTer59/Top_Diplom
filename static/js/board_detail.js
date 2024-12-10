@@ -25,9 +25,9 @@ new Vue({
             newTaskTitle: "",
             newTaskDescription: "",
             newTaskAssignedTo: null,
-            newTaskStatus: "",
-            newTaskList: null,
+            newTaskStatus: null,
             newTaskDeadline: null,
+            newTaskIsUrgent: false,
 
 
         };
@@ -39,6 +39,27 @@ new Vue({
 
     },
     methods: {
+        // Метод для сортировки задач в списке по дедлайну и срочности
+        sortTasksByDueDateAndUrgency(listId) {
+            if (Array.isArray(this.tasks[listId])) {
+                this.tasks[listId].sort((a, b) => {
+                    // Сначала проверяем на просроченность (is_overdue), потом срочность (is_urgent)
+                    if (a.is_overdue !== b.is_overdue) {
+                        return a.is_overdue ? -1 : 1; // Просроченные задачи идут первыми
+                    }
+
+                    if (a.is_urgent !== b.is_urgent) {
+                        return a.is_urgent ? -1 : 1; // Срочные задачи идут после просроченных
+                    }
+
+                    // Если задачи имеют одинаковую срочность/прошедший срок, сортируем по дедлайну
+                    const dateA = new Date(a.due_date);
+                    const dateB = new Date(b.due_date);
+                    return dateA - dateB; // Сортируем по возрастанию дедлайна
+                });
+            }
+        },
+
         // Метод для загрузки данных о доске и списках
         async fetchBoardData() {
             if (!this.boardId) {
@@ -58,7 +79,6 @@ new Vue({
                 const membersData = await boardMembersResponse.json();
                 this.boardMembers = membersData;
 
-                console.log(this.tasks)
 
                 // Запрашиваем все списки для этой доски
                 const listsResponse = await fetch(`${this.baseUrl}api/boards/${this.boardId}/lists/`);
@@ -70,83 +90,105 @@ new Vue({
                     const tasksResponse = await fetch(`${this.baseUrl}api/lists/${list.id}/tasks/`);
                     const tasksData = await tasksResponse.json();
                     this.$set(this.tasks, list.id, tasksData); // Сохраняем задачи для каждого списка
+
+                    this.sortTasksByDueDateAndUrgency(list.id); // Сортируем задачи по дедлайну и срочности
                 }
+
             } catch (error) {
                 console.error('Ошибка при загрузке данных:', error);
             }
         },
 
-        getTaskClass(status) {
-            switch (status) {
-                case 'В работе':
-                    return 'task-in-progress'; // Класс для "В работе"
-                case 'Срочно':
-                    return 'task-urgent'; // Класс для "Срочно"
-                case 'Просрочено':
-                    return 'task-overdue'; // Класс для "Просрочено"
-                case 'Выполнено':
-                    return 'task-completed'; // Класс для "Выполнено"
-                default:
-                    return ''; // Без статуса, пустой класс
-            }
+
+        // ========================== СПИСКИ ==================================
+        // Метод для пересчета позиций списков
+        recalculatePositions() {
+            this.lists.forEach((list, index) => {
+                // Убираем архив из пересчета
+                if (list.name.toLowerCase() !== 'архив') {
+                    list.position = index + 1;
+                }
+            });
         },
 
-        async getUsers() {
-            try {
-                const response = await fetch(`${this.baseUrl}/users/profiles`);
-                const data = await response.json();
-                this.availableUsers = data;
-            } catch (error) {
-                console.error('Ошибка при загрузке списка пользователей:', error);
-            }
-        },
 
-        // Метод для добавления новой задачи в список
-        async addNewTask(listId) {
-             if (!this.newTaskTitle.trim()) {
-                alert("Введите название задачи");
+        // Удаляет задачу из текущего списка
+        removeTaskFromList(taskId, listId) {
+            // Проверяем, существует ли список с такими задачами
+            if (!Array.isArray(this.tasks[listId])) {
+                console.error(`Список с ID ${listId} не существует.`);
                 return;
             }
-            console.log(this.newTaskStatus)
-            try {
-                const taskData = {
-                    title: this.newTaskTitle,
-                    description: this.newTaskDescription,
-                    due_date: this.newTaskDeadline,
-                    assigned_to: this.newTaskAssignedTo,
-                    status: this.newTaskStatus,
-                };
 
-                console.log(this.newTaskDeadline)
+            // Находим индекс задачи в списке
+            const taskIndex = this.tasks[listId].findIndex(task => task.id === taskId);
 
+            if (taskIndex !== -1) {
+                // Если задача найдена, удаляем её из массива
+                this.tasks[listId].splice(taskIndex, 1);
+            } else {
+                console.error(`Задача с ID ${taskId} не найдена в списке ${listId}.`);
+            }
+        },
 
-                const response = await fetch(`${this.baseUrl}api/boards/${this.boardId}/lists/${this.newTaskList}/tasks/create`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRFToken": getCsrfToken(),
-                    },
-                    body: JSON.stringify(taskData),
-                });
+        // Добавляет задачу в новый список
+        addTaskToList(task, listId) {
+            // Проверяем, является ли this.tasks[listId] массивом
+            if (!Array.isArray(this.tasks[listId])) {
+                this.$set(this.tasks, listId, []);  // Если нет, инициализируем как пустой массив
+            }
 
-                if (!response.ok) {
-                    throw new Error("Ошибка при добавлении задачи");
+            this.tasks[listId].push(task); // Добавляем задачу в массив
+        },
+
+        // Получаем ID следующего списка по позиции
+        getNextListId(currentListId) {
+            const sortedLists = this.sortListsByPosition();
+            const currentIndex = sortedLists.findIndex(list => list.id === currentListId);
+            return sortedLists[currentIndex + 1] ? sortedLists[currentIndex + 1].id : currentListId;
+        },
+
+        // Получаем ID предыдущего списка по позиции
+        getPreviousListId(currentListId) {
+            const sortedLists = this.sortListsByPosition();
+            const currentIndex = sortedLists.findIndex(list => list.id === currentListId);
+            return sortedLists[currentIndex - 1] ? sortedLists[currentIndex - 1].id : currentListId;
+        },
+
+        // Сортировка списков по позиции
+        sortListsByPosition() {
+            return this.lists.slice().sort((a, b) => a.position - b.position);
+        },
+
+        // Удаление списка с пересчетом позиций
+        async deleteList() {
+            if (confirm('Вы уверены, что хотите удалить этот список?')) {
+                try {
+                    // Отправляем запрос на сервер для удаления списка
+                    const response = await fetch(`${this.baseUrl}api/boards/${this.boardId}/lists/${this.editListId}/delete/`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCsrfToken(),
+                        },
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Ошибка при удалении списка');
+                    }
+
+                    // Удаляем список из локального массива
+                    const index = this.lists.findIndex(list => list.id === this.editListId); // Найдем индекс элемента
+                    if (index !== -1) {
+                        this.lists.splice(index, 1); // Удаляем элемент по индексу
+                        this.$set(this, 'lists', [...this.lists]); // потенциально убрать
+                        this.recalculatePositions();  // Пересчитываем позиции
+
+                    }
+                    this.closeEditListPopup();
+                } catch (error) {
+                    alert(error.message);
                 }
-
-                const newTask = await response.json();
-                console.log(newTask)
-                // Проверяем, существует ли массив задач для текущего списка (this.newTaskList)
-                if (!Array.isArray(this.tasks[this.newTaskList])) {
-                    this.$set(this.tasks, this.newTaskList, []);  // Инициализируем массив, если его нет
-                }
-
-                // Добавляем новую задачу в массив задач для этого списка
-                this.tasks[this.newTaskList].push(newTask);
-
-                this.closeAddTaskPopup();
-                this.resetTaskForm(); // Очищаем форму
-            } catch (error) {
-                alert(error.message);
             }
         },
 
@@ -154,6 +196,12 @@ new Vue({
         async addNewList() {
             if (!this.newListName.trim()) {
                 alert("Введите имя списка");
+                return;
+            }
+
+            // Проверка, не пытается ли пользователь создать список с именем "Архив"
+            if (this.newListName.toLowerCase() === 'архив') {
+                alert("Нельзя создать список с именем 'Архив'");
                 return;
             }
 
@@ -172,12 +220,19 @@ new Vue({
                 }
 
                 const newList = await response.json();
-                this.lists.push(newList);
+
+                const archiveIndex = this.lists.findIndex(list => list.name.toLowerCase() === 'архив');
+                if (archiveIndex !== -1) {
+                    this.lists.splice(archiveIndex, 0, newList);  // Вставляем перед архивом
+                } else {
+                    this.lists.push(newList); // Если архив не найден, добавляем в конец
+                }
+
+                this.recalculatePositions();  // Пересчитываем позиции
                 this.closeCreateListPopup()
                 this.newListName = '';
 
             } catch(error) {
-                print('err')
                 alert(error.message);
             }
         },
@@ -213,38 +268,135 @@ new Vue({
             }
         },
 
-        async deleteList() {
-            if (confirm('Вы уверены, что хотите удалить этот список?')) {
+        // ========================== СПИСКИ ==================================
+        // ========================== ЗАДАЧИ ==================================
+        // Метод для перемещения задачи
+        async moveTask(taskId, currentListId, direction) {
+            const task = this.findTaskById(taskId);
+            if (!task) return;
+
+            let newListId = currentListId;
+            if (direction === 'forward') {
+                newListId = this.getNextListId(currentListId);
+            } else if (direction === 'back') {
+                newListId = this.getPreviousListId(currentListId);
+            }
+
+            if (newListId !== currentListId) {
+                // Удаляем задачу из старого списка
+                this.removeTaskFromList(taskId, currentListId);
+                // Добавляем задачу в новый список
+                this.addTaskToList(task, newListId);
+
+                // Сортируем задачи в новом списке по дедлайну и срочности
+                this.sortTasksByDueDateAndUrgency(newListId);
+
+                // Отправляем запрос на сервер для обновления только нужных данных задачи
                 try {
-                    // Отправляем запрос на сервер для удаления списка
-                    const response = await fetch(`${this.baseUrl}api/boards/${this.boardId}/lists/${this.editListId}/delete/`, {
-                        method: 'DELETE',
+                    const response = await fetch(`${this.baseUrl}api/boards/${this.boardId}/lists/${currentListId}/tasks/${taskId}/edit/`, {
+                        method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json',
                             'X-CSRFToken': getCsrfToken(),
                         },
+                        body: JSON.stringify({
+                            status: newListId,       // Новый список
+                            due_date: task.due_date  // Дедлайн задачи (оставляем без изменений)
+                        })
                     });
 
                     if (!response.ok) {
-                        throw new Error('Ошибка при удалении списка');
+                        throw new Error("Ошибка при перемещении задачи");
                     }
-
-                    // Удаляем список из локального массива
-                    const index = this.lists.findIndex(list => list.id === this.editListId); // Найдем индекс элемента
-                    if (index !== -1) {
-                        this.lists.splice(index, 1); // Удаляем элемент по индексу
-                        this.$set(this, 'lists', [...this.lists]);
-                    }
-                    this.closeEditListPopup();
                 } catch (error) {
                     alert(error.message);
                 }
             }
         },
 
+        // Находит задачу по ID
+        findTaskById(taskId) {
+            // Находим все задачи для текущего списка (если они существуют)
+            for (let listId in this.tasks) {
+                if (Array.isArray(this.tasks[listId])) {
+                    const task = this.tasks[listId].find(task => task.id === taskId);
+                    if (task) {
+                        return task;
+                    }
+                }
+            }
+            // Если задача не найдена
+            console.error(`Задача с ID ${taskId} не найдена.`);
+            return null;
+        },
+
+        async getUsers() {
+            try {
+                const response = await fetch(`${this.baseUrl}/users/profiles`);
+                const data = await response.json();
+                this.availableUsers = data;
+            } catch (error) {
+                console.error('Ошибка при загрузке списка пользователей:', error);
+            }
+        },
+
+        // Метод для добавления новой задачи в список
+        async addNewTask(listId) {
+             if (!this.newTaskTitle.trim()) {
+                alert("Введите название задачи");
+                return;
+            }
+            try {
+                const taskData = {
+                    title: this.newTaskTitle,
+                    description: this.newTaskDescription,
+                    due_date: this.newTaskDeadline,
+                    assigned_to: this.newTaskAssignedTo,
+                    status: this.newTaskStatus,
+                    is_urgent: this.newTaskIsUrgent,
+                };
+
+                console.log(this.newTaskStatus)
+
+                const response = await fetch(`${this.baseUrl}api/boards/${this.boardId}/lists/${this.newTaskStatus}/tasks/create`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": getCsrfToken(),
+                    },
+                    body: JSON.stringify(taskData),
+                });
+
+                if (!response.ok) {
+                    throw new Error("Ошибка при добавлении задачи");
+                }
+
+                const newTask = await response.json();
+                console.log(newTask)
+                // Проверяем, существует ли массив задач для текущего списка (this.newTaskList)
+                if (!Array.isArray(this.tasks[this.newTaskStatus])) {
+                    this.$set(this.tasks, this.newTaskStatus, []);  // Инициализируем массив, если его нет
+                }
+
+                // Добавляем новую задачу в массив задач для этого списка
+                this.tasks[this.newTaskStatus].push(newTask);
+
+                // После добавления новой задачи, сортируем задачи по дедлайну и срочности
+                this.sortTasksByDueDateAndUrgency(this.newTaskStatus);
+
+
+                this.closeAddTaskPopup();
+                this.resetTaskForm(); // Очищаем форму
+            } catch (error) {
+                alert(error.message);
+            }
+        },
+        // ========================== ЗАДАЧИ ==================================
+        // ================================ ПОПАПЫ ==============================
+
         openAddTaskPopup(list_id) {
             const modal = new bootstrap.Modal(document.getElementById('addTaskModal'));
-            this.newTaskList = list_id
+            this.newTaskStatus = list_id
             modal.show(); // Явно вызываем Bootstrap метод для открытия окна
         },
 

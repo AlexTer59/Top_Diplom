@@ -77,7 +77,7 @@ def edit_board(request, board_id):
     try:
         board_instance = get_object_or_404(Board, id=board_id)
         check_board_access(request.user.profile, board_instance, 'U')
-        serializer = BoardSerializer(board_instance, data=request.data, partial=True)
+        serializer = BoardSerializer(board_instance, data=request.data, partial=True, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -150,6 +150,11 @@ def edit_list(request, board_id, list_id):
     try:
         list_instance = get_object_or_404(List, id=list_id)
         check_list_access(request.user.profile, list_instance, 'U')
+
+
+        if list_instance.name.lower() == 'архив':
+            raise ValidationError("Невозможно редактировать список 'Архив'.")
+
         serializer = ListSerializer(list_instance, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -170,6 +175,11 @@ def delete_list(request, board_id, list_id):
     try:
         list_instance = get_object_or_404(List, id=list_id)
         check_list_access(request.user.profile, list_instance, 'D')
+
+        # Проверка, если это столбец "Archive"
+        if list_instance.name == "Архив":
+            return Response({"error": "Столбец 'Архив' нельзя удалить."}, status=status.HTTP_400_BAD_REQUEST)
+
         list_instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     except PermissionDenied as e:
@@ -193,7 +203,7 @@ def get_tasks_by_list(request, list_id):
         check_task_access(request.user.profile, list_instance, 'R')
 
         # Получаем все задачи для указанного списка
-        tasks = Task.objects.filter(list_id=list_instance.id)
+        tasks = Task.objects.filter(status_id=list_instance.id)
 
         # Если списки найдены, сериализуем и возвращаем
         if tasks.exists():

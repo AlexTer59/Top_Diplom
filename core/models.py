@@ -47,15 +47,27 @@ class List(models.Model):
         ordering = ['position']  # Сортируем списки по полю position
 
     def save(self, *args, **kwargs):
-        if not self.position:
-            # Получаем максимальное значение position для данного board и увеличиваем на 1
-            max_position = List.objects.filter(board=self.board).aggregate(models.Max('position'))['position__max']
-            self.position = max_position + 1 if max_position is not None else 1  # если списков нет, то position = 1
+        # Если это столбец "Архив", он должен быть всегда в конце
+        if self.name == "Архив":
+            # Получаем максимальную позицию всех списков, кроме "Архива"
+            max_position = \
+            List.objects.filter(board=self.board).exclude(name="Архив").aggregate(models.Max('position'))[
+                'position__max'] or 0
+            self.position = max_position + 1
+        else:
+            # Если это не "Архив", присваиваем максимальную позицию всех остальных списков + 1
+            max_position = \
+            List.objects.filter(board=self.board).exclude(name="Архив").aggregate(models.Max('position'))[
+                'position__max'] or 0
+            self.position = max_position + 1
+
+            # Сдвигаем все остальные списки после текущего списка
+            List.objects.filter(board=self.board, position__gte=self.position).update(position=models.F('position') + 1)
+
         super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
-
 
 
 
@@ -82,15 +94,13 @@ class Task(models.Model):
                               on_delete=models.CASCADE,
                               related_name='board_tasks',
                               verbose_name='Доска')
-    list = models.ForeignKey(List,
+    status = models.ForeignKey(List,
                              on_delete=models.CASCADE,
                              related_name='list_tasks',
-                             verbose_name="Список")
-    status = models.CharField(
-        max_length=20,
-        choices=STATUS_CHOICES,
-        default=STATUS_IN_PROGRESS,
-    )
+                             verbose_name="Статус")
+    is_urgent = models.BooleanField(default=False)
+
+    is_overdue = models.BooleanField(default=False)
 
     due_date = models.DateField(blank=True,
                                 null=True,
@@ -120,6 +130,12 @@ class Task(models.Model):
     class Meta:
         verbose_name = 'Задача'
         verbose_name_plural = 'Задачи'
+
+
+    def check_overdue(self):
+        if self.due_date and self.due_date < timezone.now().date():
+            self.is_overdue = True
+            self.save()
 
 
     def __str__(self):

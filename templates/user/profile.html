@@ -63,7 +63,7 @@
                     <div class="list-group">
                         {% if tasks %}
                             {% for task in tasks %}
-                                <a href="{% url 'task_detail' task.board.id task.list.id task.id %}" class="list-group-item list-group-item-action">
+                                <a href="{% url 'task_detail' task.board.id task.status.id task.id %}" class="list-group-item list-group-item-action">
                                     {{ task.title }}
                                     <span class="badge bg-success float-end">{{ task.get_status_display }}</span>
                                 </a>

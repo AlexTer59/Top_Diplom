@@ -68,10 +68,14 @@ class ProfileView(LoginRequiredMixin, TemplateView):
             # Мои доски (доски, где пользователь владелец или участник)
             boards = Board.objects.filter(
                 Q(owner=user_profile) | Q(members=user_profile)
-            ).annotate(tasks_count=Count('board_tasks'))
+            ).distinct()
 
             # Мои задачи (все задачи, назначенные на пользователя)
-            tasks = Task.objects.filter(assigned_to=user_profile).select_related('board', 'list')
+            tasks = Task.objects.filter(assigned_to=user_profile).select_related('board', 'status')
+
+            # Подсчитываем количество задач для каждой доски
+            for board in boards:
+                board.tasks_count = Task.objects.filter(board=board).count()
 
             context['boards'] = boards
             context['tasks'] = tasks
