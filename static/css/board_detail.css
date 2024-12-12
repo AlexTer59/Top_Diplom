@@ -86,7 +86,7 @@ main {
 }
 
 /* Иконка ручки редактирования */
-.edit-icon {
+.list-edit {
     color: #b3b3b3; /* Исходный цвет */
     cursor: pointer;
     transition: color 0.3s ease;
@@ -96,22 +96,30 @@ main {
 }
 
 /* Стили для стрелочек перемещения */
-.task-title-container i {
+.move-arrow, .task-edit {
     color: #6c757d; /* Серый цвет по умолчанию */
     cursor: pointer;
     font-size: 1.5rem; /* Размер иконки */
     transition: color 0.3s ease; /* Плавное изменение цвета */
 }
 
-.task-title-container i:hover {
+.task-edit {
+    font-size: 1rem; /* Размер иконки */
+}
+
+.task-edit:hover {
+    cursor: pointer;
+    color: var(--blue);
+}
+
+.move-arrow:hover {
     cursor: pointer;
     color: var(--blue);
 }
 
 /* При наведении на иконку цвет меняется на белый */
-.edit-icon:hover  {
+.list-edit:hover  {
     color: #ffffff;
-
 }
 
 .card-body {

@@ -22,7 +22,7 @@
                 <div class="card">
                     <div class="card-header text-white d-flex justify-content-center align-items-center position-relative">
                         <h4 class="mb-0">[[ list.name ]]</h4>
-                        <i v-if="isOwner && list.name.toLowerCase() !== 'архив'" class="bi bi-pencil edit-icon position-absolute" @click="openEditListPopup(list)"></i>
+                        <i v-if="isOwner && list.name.toLowerCase() !== 'архив'" class="list-edit bi bi-pencil edit-icon position-absolute" @click="openEditListPopup(list)"></i>
                     </div>
                     <div class="card-body">
                         <div v-if="tasks[list.id] && tasks[list.id].length > 0">
@@ -33,9 +33,9 @@
                                  }">
                                 <div class="card-body">
                                     <div class="task-title-container d-flex gap-2 justify-content-between align-items-center">
-                                        <i class="bi bi-arrow-left-circle move-left" @click="moveTask(task.id, list.id, 'back')"></i>
-                                        <h6 class="task-title mb-4">[[ task.title ]]</h6>
-                                        <i class="bi bi-arrow-right-circle move-right" @click="moveTask(task.id, list.id, 'forward')"></i>
+                                        <i v-if="canMoveTask(task)" class="move-arrow bi bi-arrow-left-circle move-left" @click="moveTask(task.id, list.id, 'back')"></i>
+                                        <h6 class="task-title mb-4">[[ task.title ]] <i v-if="canEditTask(task)" class=" task-edit bi bi-pencil edit-icon" @click="openEditTaskPopup(task)"></i></h6>
+                                        <i v-if="canMoveTask(task)" class="move-arrow bi bi-arrow-right-circle move-right" @click="moveTask(task.id, list.id, 'forward')"></i>
                                     </div>
                                     <div class="d-flex justify-content-between align-items-center">
                                         <span class="task-deadline text-muted">Срок:<br>[[ task.due_date ]]</span>
@@ -191,6 +191,69 @@
             </div>
         </div>
     </div>
+
+    <!-- Модальное окно для редактирования задачи -->
+    <div class="modal fade" id="editTaskModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Редактировать задачу</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-1">Название задачи:</p>
+                    <input
+                        type="text"
+                        v-model="newTaskTitle"
+                        class="form-control"
+                        placeholder="Введите название задачи"
+                    />
+                    <br>
+
+                    <p class="mb-1">Описание задачи:</p>
+                    <textarea
+                        v-model="newTaskDescription"
+                        class="form-control"
+                        rows="3"
+                        placeholder="Введите описание задачи"
+                    ></textarea>
+                    <br>
+
+                    <p class="mb-1">Дедлайн:</p>
+                    <input
+                        type="date"
+                        v-model="newTaskDeadline"
+                        class="form-control"
+                    />
+                    <br>
+
+                    <p class="mb-1">Ответственный:</p>
+                    <select v-model="newTaskAssignedTo" class="form-control">
+                        <option v-for="member in boardMembers" :key="member.id" :value="member.id">
+                            [[ member.username ]]
+                        </option>
+                    </select>
+                    <br>
+
+                    <!-- Флажок для срочности -->
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" v-model="newTaskIsUrgent" id="urgentCheckbox" />
+                        <label class="form-check-label" for="urgentCheckbox">Отметить как срочную</label>
+                    </div>
+                </div>
+                <div class="modal-footer d-dlex justify-content-between">
+                    <button type="button" class="btn btn-danger" @click="deleteTask">Удалить задачу</button>
+                    <div class="safe-btns">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                        <button type="button" class="btn btn-primary" @click="editTask">Сохранить</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
 
 </section>
 {% endblock %}

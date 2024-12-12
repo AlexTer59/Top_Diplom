@@ -38,6 +38,7 @@ new Vue({
         this.fetchBoardData(); // Загружаем данные сразу при монтировании компонента
 
     },
+
     methods: {
         // Метод для сортировки задач в списке по дедлайну и срочности
         sortTasksByDueDateAndUrgency(listId) {
@@ -98,8 +99,6 @@ new Vue({
                 console.error('Ошибка при загрузке данных:', error);
             }
         },
-
-
         // ========================== СПИСКИ ==================================
         // Метод для пересчета позиций списков
         recalculatePositions() {
@@ -391,6 +390,127 @@ new Vue({
                 alert(error.message);
             }
         },
+
+        canMoveTask(task) {
+            // Проверяем, есть ли task и данные в нем
+            if (!task) return false;
+
+            const currentUserId = this.$el.getAttribute('data-user-id'); // Получаем ID текущего пользователя
+            return (
+                this.isOwner ||
+                task.created_by_id == currentUserId ||
+                task.assigned_to == currentUserId
+            );
+        },
+
+        canEditTask(task) {
+            return this.isOwner || task.created_by_id === this.$el.getAttribute('data-user-id');
+        },
+
+        async editTask() {
+            if (!this.newTaskTitle.trim()) {
+                alert("Введите название задачи");
+                return;
+            }
+
+            try {
+                // Подготовка данных для обновления задачи
+                const updatedTaskData = {
+                    title: this.newTaskTitle,
+                    description: this.newTaskDescription,
+                    due_date: this.newTaskDeadline,
+                    assigned_to: this.newTaskAssignedTo,
+                    is_urgent: this.newTaskIsUrgent,
+                };
+
+                // Проверка на просроченность задачи
+                const currentDate = new Date();
+                const isOverdue = new Date(this.newTaskDeadline) < currentDate;
+                updatedTaskData.is_overdue = isOverdue; // Если дата в прошлом, устанавливаем is_overdue в true, иначе false
+
+                const response = await fetch(`${this.baseUrl}api/boards/${this.boardId}/lists/${this.selectedTask.status}/tasks/${this.selectedTask.id}/edit/`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken(),
+                    },
+                    body: JSON.stringify(updatedTaskData),
+                });
+
+                if (!response.ok) {
+                    throw new Error("Ошибка при обновлении задачи");
+                }
+
+                const updatedTask = await response.json();
+
+                // Проверяем, существует ли нужный список задач
+                const listId = this.selectedTask.status;
+                if (!this.tasks[listId]) {
+                    console.error(`Задачи для списка с ID ${listId} не существует.`);
+                    return;
+                }
+
+                // Находим индекс задачи в списке
+                const taskIndex = this.tasks[listId].findIndex(task => task.id === updatedTask.id);
+                if (taskIndex !== -1) {
+                    // Обновляем задачу в массиве
+                    this.$set(this.tasks[listId], taskIndex, updatedTask);
+
+                } else {
+                    console.error(`Задача с ID ${updatedTask.id} не найдена в списке ${listId}.`);
+                }
+
+                this.sortTasksByDueDateAndUrgency(this.selectedTask.status); // Сортируем задачи по дедлайну и срочности
+
+                // Закрытие модального окна
+                this.closeEditTaskPopup();
+            } catch (error) {
+                alert(error.message);
+            }
+        },
+
+        async deleteTask() {
+            if (confirm('Вы уверены, что хотите удалить эту задачу?')) {
+                try {
+                    // Отправляем запрос на сервер для удаления задачи
+                    const response = await fetch(
+                        `${this.baseUrl}api/boards/${this.boardId}/lists/${this.selectedTask.status}/tasks/${this.selectedTask.id}/delete/`,
+                        {
+                            method: 'DELETE',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': getCsrfToken(),
+                            },
+                        }
+                    );
+
+                    if (!response.ok) {
+                        const errorDetails = await response.json();
+                        console.error("Ошибка при удалении задачи:", errorDetails);
+                        throw new Error('Ошибка при удалении задачи');
+                    }
+
+                    // Удаляем задачу из локального массива
+                    const listId = this.selectedTask.status;
+                    const taskIndex = this.tasks[listId].findIndex(task => task.id === this.selectedTask.id);
+
+                    if (taskIndex !== -1) {
+                        // Удаляем задачу из массива
+                        this.tasks[listId].splice(taskIndex, 1);
+                        // Обновляем локальный список задач, чтобы интерфейс отобразил изменения
+                        this.$set(this.tasks, listId, [...this.tasks[listId]]);
+                    }
+
+
+                    this.closeEditTaskPopup();
+
+                } catch (error) {
+                    console.error(error.message);
+                    alert("Не удалось удалить задачу. Попробуйте еще раз.");
+                }
+            }
+        },
+
         // ========================== ЗАДАЧИ ==================================
         // ================================ ПОПАПЫ ==============================
 
@@ -438,9 +558,29 @@ new Vue({
         resetTaskForm() {
             this.newTaskTitle = "";
             this.newTaskDescription = "";
-            this.newTaskDeadline = null;
             this.newTaskAssignedTo = null;
-            this.newTaskStatus = '';
+            this.newTaskStatus = null;
+            this.newTaskDeadline = null;
+            this.newTaskIsUrgent = false;
+        },
+
+        // Открытие модального окна для редактирования задачи
+        openEditTaskPopup(task) {
+            this.selectedTask = task; // Сохраняем текущую задачу для редактирования
+            this.newTaskTitle = task.title;
+            this.newTaskDescription = task.description;
+            this.newTaskDeadline = task.due_date;
+            this.newTaskAssignedTo = task.assigned_to;
+            this.newTaskIsUrgent = task.is_urgent;
+            const modal = new bootstrap.Modal(document.getElementById('editTaskModal'));
+            modal.show();
+        },
+
+         // Закрытие модального окна редактирования задачи
+        closeEditTaskPopup() {
+            const modal = bootstrap.Modal.getInstance(document.getElementById('editTaskModal'));
+            modal.hide();
+            this.resetTaskForm();
         },
     },
 });

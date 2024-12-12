@@ -148,9 +148,9 @@ class TaskSerializer(serializers.Serializer):
         return None
 
     def to_internal_value(self, data):
-        # Если due_date отсутствует или равно null, назначаем дефолтное значение
+        # Если due_date отсутствует, не ставим дефолтную дату
         if 'due_date' not in data or data['due_date'] is None:
-            data['due_date'] = get_default_due_date()
+            data.pop('due_date', None)
 
         return super().to_internal_value(data)
 

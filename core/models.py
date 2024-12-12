@@ -131,11 +131,14 @@ class Task(models.Model):
         verbose_name = 'Задача'
         verbose_name_plural = 'Задачи'
 
-
     def check_overdue(self):
-        if self.due_date and self.due_date < timezone.now().date():
-            self.is_overdue = True
-            self.save()
+        # Если дата дедлайна существует, проверяем её
+        if self.due_date:
+            if self.due_date < timezone.now().date():
+                self.is_overdue = True
+            else:
+                self.is_overdue = False
+            self.save(update_fields=['is_overdue'])
 
 
     def __str__(self):
