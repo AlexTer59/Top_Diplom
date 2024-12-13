@@ -10,13 +10,20 @@ new Vue({
         return {
             baseUrl: 'http://127.0.0.1:8000/',
             task: {},
+            board: {}, // Данные о доске
+            lists: [],  // Массив для списков
             boardMembers: [], // Участники доски
+
+            defaultAvatar: null,
+            isOwner: false,
+
             newTaskTitle: "",
             newTaskDescription: "",
             newTaskAssignedTo: null,
-            newTaskStatus: "",
-            newTaskList: null,
+            newTaskStatus: null,
             newTaskDeadline: null,
+            newTaskIsUrgent: false,
+
         };
     },
     mounted() {
@@ -24,8 +31,10 @@ new Vue({
         this.listId = this.$el.getAttribute('data-list-id');
         this.taskId = this.$el.getAttribute('data-task-id');
         this.userId = this.$el.getAttribute('data-user-id');
+        this.defaultAvatar = this.$el.getAttribute('data-default-avatar');
         this.fetchData();
     },
+
     methods: {
         async fetchData() {
 
@@ -35,74 +44,93 @@ new Vue({
             }
 
             try {
+                // Запрашиваем данные о доске
+                const boardResponse = await fetch(`${this.baseUrl}api/boards/${this.boardId}/`);
+                const boardData = await boardResponse.json();
+                this.board = boardData; // Сохраняем данные о доске
+                this.isOwner = this.board.owner == this.$el.getAttribute('data-user-id'); // Проверяем, является ли текущий пользователь владельцем
+
                 // Запрашиваем данные о задаче
                 const taskResponse = await fetch(`${this.baseUrl}api/boards/${this.boardId}/lists/${this.listId}/tasks/${this.taskId}`);
                 const taskData = await taskResponse.json();
                 this.task = taskData;
-                console.log(this.task)
 
                 // Запрашиваем участников доски
                 const boardMembersResponse = await fetch(`${this.baseUrl}users/profiles/boards/${this.boardId}/`);
                 const membersData = await boardMembersResponse.json();
                 this.boardMembers = membersData;
 
-                //
+                // Запрашиваем все списки для этой доски
+                const listsResponse = await fetch(`${this.baseUrl}api/boards/${this.boardId}/lists/`);
+                const listsData = await listsResponse.json();
+                this.lists = listsData; // Сохраняем списки
 
             } catch (error) {
                 console.error('Ошибка при загрузке данных:', error);
             }
         },
 
-        async editTask(listId) {
-            // Проверка на наличие данных
+        // Проверка, может ли текущий пользователь редактировать задачу
+        canEditTask() {
+            if (!this.task || !this.userId) {
+                return false;  // Если данные не загружены, не разрешаем редактирование
+            }
+
+            return this.isOwner || this.task.created_by_id == this.userId;
+        },
+
+        // Проверка, может ли текущий пользователь изменить только статус задачи
+        canMoveTask() {
+            if (!this.task || !this.userId) {
+                return false;  // Если данные не загружены, не разрешаем перемещение
+            }
+            return this.task.assigned_to == this.userId;
+        },
+
+        async editTask(popupId) {
             if (!this.newTaskTitle.trim()) {
                 alert("Введите название задачи");
                 return;
             }
 
             try {
-                // Формируем данные для отправки
-                const taskData = {
+                // Подготовка данных для обновления задачи
+                const updatedTaskData = {
                     title: this.newTaskTitle,
                     description: this.newTaskDescription,
                     due_date: this.newTaskDeadline,
                     assigned_to: this.newTaskAssignedTo,
-                    status: this.newTaskStatus,
+                    is_urgent: this.newTaskIsUrgent,
+                    status: this.newTaskStatus  // Новый статус
                 };
 
-                // Отправляем запрос на обновление задачи
-                const response = await fetch(
-                    `${this.baseUrl}api/boards/${this.boardId}/lists/${this.listId}/tasks/${this.taskId}/edit/`,
-                    {
-                        method: "PUT",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "X-CSRFToken": getCsrfToken(),
-                        },
-                        body: JSON.stringify(taskData),
-                    }
-                );
+                // Проверка на просроченность задачи
+                const currentDate = new Date();
+                const isOverdue = new Date(this.newTaskDeadline) < currentDate;
+                updatedTaskData.is_overdue = isOverdue; // Если дата в прошлом, устанавливаем is_overdue в true, иначе false
 
-                // Проверяем успешность запроса
+                const response = await fetch(`${this.baseUrl}api/boards/${this.boardId}/lists/${this.task.status}/tasks/${this.task.id}/edit/`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken(),
+                    },
+                    body: JSON.stringify(updatedTaskData),
+                });
+
                 if (!response.ok) {
-                    const errorDetails = await response.json();
-                    console.error("Ошибка при обновлении задачи:", errorDetails);
                     throw new Error("Ошибка при обновлении задачи");
                 }
 
-                // Получаем обновленные данные задачи
                 const updatedTask = await response.json();
-                console.log("Обновленная задача:", updatedTask);
 
                 // Обновляем текущую задачу в приложении
                 Object.assign(this.task, updatedTask);
 
-                // Закрываем форму редактирования и сбрасываем поля
-                this.closeEditTaskPopup();
-                this.resetTaskForm();
+                // Закрытие модального окна
+                this.closeEditTaskPopup(popupId);
             } catch (error) {
-                console.error("Ошибка:", error.message);
-                alert("Не удалось обновить задачу. Попробуйте еще раз.");
+                alert(error.message);
             }
         },
 
@@ -127,8 +155,8 @@ new Vue({
                         throw new Error('Ошибка при удалении задачи');
                     }
 
-                    // Редирект на страницу со списком задач или другую страницу
-                    window.location.href = `${this.baseUrl}boards/${this.boardId}/`;
+                    // Редирект на страницу со списком задач
+                    this.backToBoard();
 
                 } catch (error) {
                     console.error(error.message);
@@ -145,24 +173,31 @@ new Vue({
             this.newTaskTitle = "";
             this.newTaskDescription = "";
             this.newTaskAssignedTo = null;
-            this.newTaskStatus = "";
-            this.newTaskList = null;
+            this.newTaskStatus = null;
             this.newTaskDeadline = null;
+            this.newTaskIsUrgent = false;
         },
 
-        openEditTaskPopup(list) {
-            const modal = new bootstrap.Modal(document.getElementById('editTaskModal'));
+        openEditTaskPopup(popupId) {
             this.newTaskTitle = this.task.title;
             this.newTaskDescription = this.task.description;
-            this.newTaskDeadline = this.task.due_date;
-            this.newTaskAssignedTo = this.task.assigned_to
-            this.newTaskStatus = this.task.status;
-            modal.show(); // Явно вызываем Bootstrap метод для открытия окна
+            const [day, month, year] = this.task.due_date.split('-');
+            this.newTaskDeadline = `${year}-${month}-${day}`;
+            this.newTaskStatus = this.task.status;  // Статус задачи, устанавливаем ID списка
+            this.newTaskAssignedTo = this.task.assigned_to;
+            this.newTaskIsUrgent = this.task.is_urgent;
+            const modal = new bootstrap.Modal(document.getElementById(popupId));
+            modal.show();
         },
 
-        closeEditTaskPopup() {
-            const modal = bootstrap.Modal.getInstance(document.getElementById('editTaskModal'));
-            modal.hide(); // Явно вызываем Bootstrap метод для открытия окна
+
+        closeEditTaskPopup(popupId) {
+            const modal = bootstrap.Modal.getInstance(document.getElementById(popupId));
+            modal.hide();
+            this.resetTaskForm();
         },
+
+
+
     },
 });

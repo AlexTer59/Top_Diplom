@@ -66,7 +66,7 @@ new Vue({
                         formData.append(key, this.editForm[key]);
                     }
                 });
-                const response = await fetch(`${this.baseUrl}users/profiles/${this.profileId}/api/edit`, {
+                const response = await fetch(`${this.baseUrl}users/profiles/${this.profileId}/api/edit/`, {
                     method: 'PUT',
                     headers: {
                         "X-CSRFToken": getCsrfToken(),

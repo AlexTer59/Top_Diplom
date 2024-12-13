@@ -1,65 +1,79 @@
 {% extends 'app_base.html' %}
 {% load static %}
 
-{% block title %}Детали задачи {{ task.title }}{% endblock %}
+{% block title %}{{ task.title }}{% endblock %}
 
 {% block styles %}
-<link rel="stylesheet" href="{% static 'css/task_detail.css' %}">
+    <link rel="stylesheet" href="{% static 'css/task_detail.css' %}">
 {% endblock styles %}
 
 {% block content %}
-<div id="app" class="task-detail container mt-4" data-list-id="{{ list_id }}" data-task-id="{{ task_id }}" data-board-id="{{ board_id }}" data-user-id="{{ user.profile.id }}" >
-    <div class="card">
-        <div class="card-header">
-            <h5 class="card-title mb-0">[[ task.title ]]</h5>
-        </div>
-        <div class="card-body">
-            <p class="card-text">
-                <strong>Описание:</strong> [[ task.description ]]
-            </p>
-            <p class="card-text">
-                <strong>Статус:</strong> [[ task.status_name ]]
-            </p>
-            <p class="card-text">
-                <strong>Доска:</strong> [[ task.board_name ]]
-            </p>
-            <p class="card-text">
-                <strong>Список:</strong> [[ task.list_name ]]
-            </p>
-            <p class="card-text">
-                <strong>Срок выполнения:</strong> [[ task.due_date ]]
-            </p>
-            <p class="card-text">
-                <strong>Задача создана:</strong> [[ task.created_at_datetime ]]
-            </p>
-            <p class="card-text">
-                <strong>Кем создана:</strong> [[ task.created_by_username ]]
-            </p>
-            <p class="card-text">
-                <strong>Задача обновлена:</strong> [[ task.updated_at_datetime ]]
-            </p>
-            <p class="card-text">
-                <strong>Кому назначена:</strong> [[ task.assigned_to_username ]]
-            </p>
-        </div>
+<section class="task-detail py-5" id="app" data-list-id="{{ list_id }}" data-task-id="{{ task_id }}" data-board-id="{{ board_id }}" data-user-id="{{ user.profile.id }}" data-default-avatar="{% static 'img/default_avatar.png' %}">
+    <div class="container">
+        <div class="task-card">
+            <div class="card-header">
+                <h2 class="task-title">[[ task.title ]]</h2>
+            </div>
+            <div class="card-body">
+                <div class="task-details">
+                    <div class="task-field">
+                        <strong>Описание:</strong>
+                        <p>[[ task.description || "Нет описания" ]]</p>
+                    </div>
 
-        <div class="card-footer d-flex justify-content-between">
-            <button class="btn btn-primary" @click="openEditTaskPopup">Редактировать</button>
-            <button class="btn btn-secondary" @click="backToBoard">Вернуться к доске</button>
-            <button class="btn btn-danger" @click="deleteTask">Удалить</button>
+                    <div class="task-field">
+                        <strong>Статус:</strong>
+                        <p>[[ task.status_name ]]</p>
+                    </div>
 
+                    <div class="task-field">
+                        <strong>Дата создания:</strong>
+                        <p>[[ task.created_at_datetime ]]</p>
+                    </div>
+                    <div class="task-field">
+                        <strong>Дедлайн:</strong>
+                        <p :class="{ 'overdue': task.is_overdue }">[[ task.due_date ]]</p>
+                    </div>
+                    <div class="task-field">
+                        <strong>Ответственный:</strong>
+                        <div class="assigned-user">
+                            <img :src="task.assigned_to_avatar || defaultAvatar" alt="Avatar" class="avatar-img rounded-circle">
+                            <span>[[ task.assigned_to_username ]]</span>
+                        </div>
+                    </div>
+                    <div class="task-field">
+                        <strong>Срочность:</strong>
+                        <p :class="{ 'urgent': task.is_urgent }">[[ task.is_urgent ? "Срочная" : "Обычная" ]]</p>
+                    </div>
+                    <div class="task-field">
+                        <strong>Создано:</strong>
+                            <div class="created-user">
+                                <img :src="task.created_by_avatar || defaultAvatar" alt="Avatar" class="avatar-img rounded-circle">
+                                <span>[[ task.created_by_username ]]</span>
+                            </div>
+                    </div>
+                    <div class="task-actions">
+                        <button v-if="canEditTask()" class="btn btn-primary" @click="openEditTaskPopup('editTaskModal')">Редактировать</button>
+                        <button class="btn btn-secondary" @click="backToBoard">Вернуться к доске</button>
+                        <button v-if="canMoveTask() && !canEditTask()" class="btn btn-primary" @click="openEditTaskPopup('changeStatusModal')">Изменить статус</button>
+                        <button v-if="canEditTask()" class="btn btn-danger" @click="deleteTask()">Удалить</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
+
+
+    <!-- Модальное окно для редактирования задачи -->
     <div class="modal fade" id="editTaskModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Добавить задачу</h5>
+                    <h5 class="modal-title">Редактировать задачу</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
                 </div>
                 <div class="modal-body">
-                    <!-- Поле для названия задачи -->
                     <p class="mb-1">Название задачи:</p>
                     <input
                         type="text"
@@ -70,7 +84,6 @@
                     <br>
 
                     <p class="mb-1">Описание задачи:</p>
-                    <!-- Поле для описания задачи -->
                     <textarea
                         v-model="newTaskDescription"
                         class="form-control"
@@ -80,7 +93,6 @@
                     <br>
 
                     <p class="mb-1">Дедлайн:</p>
-                    <!-- Поле для выбора даты дедлайна -->
                     <input
                         type="date"
                         v-model="newTaskDeadline"
@@ -88,8 +100,16 @@
                     />
                     <br>
 
+                    <!-- Статус задачи (выпадающий список с именами всех списков) -->
+                    <p class="mb-1">Статус задачи:</p>
+                    <select v-model="newTaskStatus" class="form-control">
+                        <option v-for="list in lists" :key="list.id" :value="list.id">
+                            [[ list.name ]]
+                        </option>
+                    </select>
+                    <br>
+
                     <p class="mb-1">Ответственный:</p>
-                    <!-- Поле для выбора ответственного -->
                     <select v-model="newTaskAssignedTo" class="form-control">
                         <option v-for="member in boardMembers" :key="member.id" :value="member.id">
                             [[ member.username ]]
@@ -97,24 +117,53 @@
                     </select>
                     <br>
 
-                    <p class="mb-1">Статус задачи:</p>
-                    <!-- Поле для выбора приоритета -->
-                    <select v-model="newTaskStatus" id="status" name="status" class="form-control" required>
-                        <option value="in_progress" selected>В работе</option>
-                        <option value="urgent">Срочно</option>
-                        <option value="overdue">Просрочено</option>
-                        <option value="completed">Выполнено</option>
-                    </select>
+                    <!-- Флажок для срочности -->
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" v-model="newTaskIsUrgent" id="urgentCheckbox" />
+                        <label class="form-check-label" for="urgentCheckbox">Отметить как срочную</label>
+                    </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-                    <button type="button" class="btn btn-primary" @click="editTask">Редактировать</button>
+                <div class="modal-footer d-dlex justify-content-between">
+                    <button type="button" class="btn btn-danger" @click="deleteTask">Удалить задачу</button>
+                    <div class="safe-btns">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                        <button type="button" class="btn btn-primary" @click="editTask('editTaskModal')">Сохранить</button>
+                    </div>
+
                 </div>
             </div>
         </div>
     </div>
 
-</div>
+    <!-- Модальное окно для редактирования статуса задачи -->
+    <div class="modal fade" id="changeStatusModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Редактировать задачу</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Статус задачи (выпадающий список с именами всех списков) -->
+                    <p class="mb-1">Статус задачи:</p>
+                    <select v-model="newTaskStatus" class="form-control">
+                        <option v-for="list in lists" :key="list.id" :value="list.id">
+                            [[ list.name ]]
+                        </option>
+                    </select>
+                    <br>
+
+                </div>
+                <div class="modal-footer d-dlex justify-content-between">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="button" class="btn btn-primary" @click="editTask('changeStatusModal')">Сохранить</button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
 
 {% endblock %}
 

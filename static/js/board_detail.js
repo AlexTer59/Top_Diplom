@@ -34,7 +34,7 @@ new Vue({
     },
     mounted() {
         this.boardId = this.$el.getAttribute('data-board-id'); // Получаем boardId из data-атрибута только после монтирования
-        this.defaultAvatar = this.$el.getAttribute('data-default-avatar')
+        this.defaultAvatar = this.$el.getAttribute('data-default-avatar');
         this.fetchBoardData(); // Загружаем данные сразу при монтировании компонента
 
     },
@@ -290,6 +290,10 @@ new Vue({
                 // Сортируем задачи в новом списке по дедлайну и срочности
                 this.sortTasksByDueDateAndUrgency(newListId);
 
+                const [day, month, year] = task.due_date.split('-');
+                const rawDate = `${year}-${month}-${day}`;
+
+
                 // Отправляем запрос на сервер для обновления только нужных данных задачи
                 try {
                     const response = await fetch(`${this.baseUrl}api/boards/${this.boardId}/lists/${currentListId}/tasks/${taskId}/edit/`, {
@@ -300,7 +304,7 @@ new Vue({
                         },
                         body: JSON.stringify({
                             status: newListId,       // Новый список
-                            due_date: task.due_date  // Дедлайн задачи (оставляем без изменений)
+                            due_date: rawDate  // Дедлайн задачи (оставляем без изменений)
                         })
                     });
 
@@ -569,7 +573,8 @@ new Vue({
             this.selectedTask = task; // Сохраняем текущую задачу для редактирования
             this.newTaskTitle = task.title;
             this.newTaskDescription = task.description;
-            this.newTaskDeadline = task.due_date;
+            const [day, month, year] = task.due_date.split('-');
+            this.newTaskDeadline = `${year}-${month}-${day}`;
             this.newTaskAssignedTo = task.assigned_to;
             this.newTaskIsUrgent = task.is_urgent;
             const modal = new bootstrap.Modal(document.getElementById('editTaskModal'));

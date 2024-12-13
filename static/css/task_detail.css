@@ -1,0 +1,85 @@
+/* Общие стили для страницы task-detail */
+main {
+    background-color: #f8f9fa;
+}
+
+.task-detail {
+    padding-top: 30px;
+}
+
+.task-card {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.card-header {
+    background-color: #3076f9;
+    padding: 20px;
+    color: white;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.task-title {
+    margin: 0;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+.task-field {
+    margin-bottom: 15px;
+}
+
+.task-field strong {
+    font-weight: bold;
+}
+
+.task-field p,
+.task-field span {
+    font-size: 1rem;
+    color: #555;
+}
+
+.assigned-user, .created-user {
+    display: flex;
+    align-items: center;
+}
+
+.assigned-user img, .created-user img {
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
+}
+
+.assigned-user span {
+    font-size: 1rem;
+    color: #555;
+}
+
+.urgent {
+    color: red !important;
+}
+
+.overdue {
+    color: red !important;
+    font-weight: bold;
+}
+
+.task-actions {
+    margin-top: 40px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.task-actions .btn {
+    padding: 10px 20px;
+}
+
+
+
+

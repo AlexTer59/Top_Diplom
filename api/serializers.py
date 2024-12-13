@@ -93,11 +93,13 @@ class TaskSerializer(serializers.Serializer):
     updated_at_datetime = serializers.SerializerMethodField(read_only=True)
     labels = serializers.JSONField(required=False, default=dict)
     assigned_to = serializers.PrimaryKeyRelatedField(queryset=Profile.objects.all(), required=False, allow_null=True)
-    created_by_id = serializers.CharField(source='created_by.user.id', read_only=True)
-
     assigned_to_username = serializers.CharField(source='assigned_to.user.username', read_only=True)
     assigned_to_avatar = serializers.SerializerMethodField()
+    created_by_id = serializers.IntegerField(source='created_by.user.profile.id', read_only=True)
     created_by_username = serializers.CharField(source='created_by.user.username', read_only=True)
+    created_by_avatar = serializers.SerializerMethodField()
+
+
 
 
     def validate(self, attrs):
@@ -136,6 +138,18 @@ class TaskSerializer(serializers.Serializer):
         instance.check_overdue()
         return instance
 
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+
+        # Преобразуем due_date в формат dd-mm-yyyy, если оно присутствует
+        if representation.get('due_date'):
+            due_date = representation['due_date']
+            due_date = datetime.strptime(due_date, '%Y-%m-%d').date()
+            # Преобразуем дату в нужный формат
+            representation['due_date'] = due_date.strftime('%d-%m-%Y')
+
+        return representation
+
     def get_created_at_datetime(self, obj):
         return localtime(obj.created_at).strftime('%d-%m-%Y %H:%M')
 
@@ -145,6 +159,11 @@ class TaskSerializer(serializers.Serializer):
     def get_assigned_to_avatar(self, obj):
         if obj.assigned_to and obj.assigned_to.avatar:
             return obj.assigned_to.avatar.url
+        return None
+
+    def get_created_by_avatar(self, obj):
+        if obj.created_by and obj.created_by.avatar:
+            return obj.created_by.avatar.url
         return None
 
     def to_internal_value(self, data):
