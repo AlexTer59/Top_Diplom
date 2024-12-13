@@ -6,16 +6,26 @@
 
 .overdue-task {
     background-color: #de7777;
+    transition: background-color 0.3s ease;
 }
 
 .urgent-task {
     background-color: #f5c76b;
+    transition: background-color 0.3s ease;
 }
 
 .overdue-task:hover {
-    background-color: #e8a0a0; #f7d899
+    background-color: #e8a0a0;
 }
 
 .urgent-task:hover {
     background-color: #f7d899;
+}
+
+.list-group-item {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.list-group a:hover {
+    color: var(--blue);
 }

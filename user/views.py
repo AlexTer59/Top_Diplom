@@ -60,6 +60,15 @@ class ProfileView(LoginRequiredMixin, TemplateView):
         # Проверяем, является ли текущий пользователь владельцем профиля
         is_owner = self.request.user.profile == user_profile
 
+        # Подписка
+        subscription = getattr(user_profile, 'subscription', None)
+        if subscription:
+            context['subscription_type'] = subscription.get_tier_display()
+            context['subscription_expiration'] = subscription.expires_at or "—"
+        else:
+            context['subscription_type'] = "Базовая"
+            context['subscription_expiration'] = "—"
+
         # Личная информация
         context['profile'] = user_profile
         context['is_owner'] = is_owner
@@ -96,3 +105,27 @@ class ProfileView(LoginRequiredMixin, TemplateView):
             context['tasks'] = []
 
         return context
+
+@login_required
+def activate_premium(request, profile_id):
+    try:
+        profile = request.user.profile
+        subscription, created = Subscription.objects.get_or_create(profile=profile)
+
+        if subscription.tier == Subscription.PREMIUM:
+            if subscription.expires_at and subscription.expires_at > now():
+                subscription.expires_at += timedelta(days=30)  # Продление подписки
+            else:
+                subscription.expires_at = now() + timedelta(days=30)  # Новая подписка
+        else:
+            subscription.tier = Subscription.PREMIUM
+            subscription.expires_at = now() + timedelta(days=30)  # Новая подписка
+
+        subscription.save()
+
+        messages.success(request, "Премиум подписка активирована или продлена на 30 дней.")
+        return redirect("profile_detail", profile_id=profile.id)  # Переход в профиль пользователя
+
+    except Exception as e:
+        messages.error(request, f"Ошибка активации подписки: {str(e)}")
+        return redirect("price_detail.html")

@@ -40,7 +40,7 @@
                     {% if tier == 'base' %}
                     <a href="{% url 'boards' %}" class="btn btn-primary">Начать использовать</a>
                     {% elif tier == 'premium' %}
-                    <a href="#" class="btn btn-primary">Приобрести</a>
+                    <a href="{% url 'activate_premium' user.profile.id %}" class="btn btn-primary">Приобрести</a>
                     {% endif %}
                 </div>
             </div>

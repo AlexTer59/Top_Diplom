@@ -33,6 +33,9 @@
                     <li class="list-group-item"><strong>Фамилия:</strong> [[ profile.last_name ]]</li>
                     <li class="list-group-item"><strong>Дата рождения:</strong> [[ formatDate(profile.birth_date) ]]</li>
                     <li class="list-group-item"><strong>Дата регистрации:</strong> [[ formatDate(profile.created_at) ]]</li>
+                    <li class="list-group-item"><strong>Тип подписки:</strong> {{ subscription_type }}</li>
+                    <li class="list-group-item"><strong>Окончание подписки:</strong> {{ subscription_expiration }}</li>
+
                 </ul>
             </div>
         </div>
@@ -64,7 +67,7 @@
                         {% if tasks %}
                             {% for task in tasks %}
                                 <a href="{% url 'task_detail' task.board.id task.status.id task.id %}"
-                                    class="list-group-item list-group-item-action{% if task.is_overdue %} overdue-task{% elif task.is_urgent %} urgent-task{% else %}normal-task{% endif %}">
+                                    class="list-group-item list-group-item-action{% if task.is_overdue %} overdue-task{% elif task.is_urgent %} urgent-task{% else %} normal-task{% endif %}">
                                     {{ task.title }} ({{ task.board.name }})
                                     <span class="badge bg-success float-end">{{ task.get_status_display }}</span>
                                 </a>

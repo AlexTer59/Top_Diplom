@@ -22,6 +22,7 @@ html, body {
 
 body {
     display: flex;
+    position: relative;
     flex-direction: column;
 }
 
@@ -147,6 +148,37 @@ main {
 
 .feature-title {
     color: #2e6df7;
+}
+
+.alert-container {
+    position: absolute; /* Меняем fixed на absolute */
+    top: 80px;
+    left: 20px;
+    z-index: 1050; /* Устанавливаем высокий z-index для перекрытия других элементов */
+    max-width: 300px;
+    width: 100%; /* Полная ширина внутри родительского блока */
+}
+
+.alert {
+    margin-bottom: 10px; /* Расстояние между сообщениями */
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Тень для сообщений */
+    background-color: #f8f9fa; /* Цвет фона */
+    color: #333; /* Цвет текста */
+    transition: opacity 0.3s ease, transform 0.3s ease; /* Плавное появление/исчезновение */
+}
+
+.alert.alert-success {
+    background-color: #d4edda; /* Зеленый фон для успешного сообщения */
+    color: #155724; /* Темно-зеленый текст */
+    border: 1px solid #c3e6cb; /* Обводка для успешного сообщения */
+}
+
+.alert.alert-error {
+    background-color: #f8d7da; /* Красный фон для ошибки */
+    color: #721c24; /* Темно-красный текст */
+    border: 1px solid #f5c6cb; /* Обводка для ошибки */
 }
 
 

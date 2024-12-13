@@ -8,6 +8,7 @@ urlpatterns = [
     path('profiles/logout', logout, name='logout'),
     path('profiles/register', register, name='register'),
     path('profiles/<int:profile_id>', ProfileView.as_view(), name='profile_detail'),
+    path('profiles/<int:profile_id>/subscription/activate', activate_premium, name='activate_premium'),
 
     path('profiles/boards/<int:board_id>/', get_profiles_by_board, name='get_profiles_by_board'),
 
