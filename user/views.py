@@ -73,6 +73,17 @@ class ProfileView(LoginRequiredMixin, TemplateView):
             # Мои задачи (все задачи, назначенные на пользователя)
             tasks = Task.objects.filter(assigned_to=user_profile).select_related('board', 'status')
 
+            # Сортируем задачи
+            tasks = sorted(
+                tasks,
+                key=lambda task: (
+                    not task.is_overdue,  # Сначала просроченные задачи
+                    not task.is_urgent,  # Затем срочные задачи
+                    task.due_date  # И затем все задачи по дедлайну
+                )
+            )
+
+
             # Подсчитываем количество задач для каждой доски
             for board in boards:
                 board.tasks_count = Task.objects.filter(board=board).count()

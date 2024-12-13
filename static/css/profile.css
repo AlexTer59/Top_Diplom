@@ -3,3 +3,19 @@
     margin: 0 auto;
     word-wrap: break-word;
 }
+
+.overdue-task {
+    background-color: #de7777;
+}
+
+.urgent-task {
+    background-color: #f5c76b;
+}
+
+.overdue-task:hover {
+    background-color: #e8a0a0; #f7d899
+}
+
+.urgent-task:hover {
+    background-color: #f7d899;
+}

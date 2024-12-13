@@ -63,8 +63,9 @@
                     <div class="list-group">
                         {% if tasks %}
                             {% for task in tasks %}
-                                <a href="{% url 'task_detail' task.board.id task.status.id task.id %}" class="list-group-item list-group-item-action">
-                                    {{ task.title }}
+                                <a href="{% url 'task_detail' task.board.id task.status.id task.id %}"
+                                    class="list-group-item list-group-item-action{% if task.is_overdue %} overdue-task{% elif task.is_urgent %} urgent-task{% else %}normal-task{% endif %}">
+                                    {{ task.title }} ({{ task.board.name }})
                                     <span class="badge bg-success float-end">{{ task.get_status_display }}</span>
                                 </a>
                             {% endfor %}
