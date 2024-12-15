@@ -307,14 +307,53 @@ def delete_task(request, board_id, list_id, task_id):
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def get_notes(request, board_id, list_id, task_id):
+def get_comments(request, task_id):
     """Получение заметок по задаче"""
     try:
-        notes = TaskNote.objects.filter(task__id=task_id)
+        comments = TaskComment.objects.filter(task__id=task_id)
         task_instance = get_object_or_404(Task, id=task_id)
         check_task_access(request.user.profile, task_instance, 'R')
-        serializer = TaskNoteSerializer(notes, many=True, context={'request': request})
-        return Response({'notes': serializer.data })
+        serializer = TaskCommentSerializer(comments, many=True, context={'request': request})
+        return Response(serializer.data)
+    except PermissionDenied as e:
+        return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
+    except Exception as e:
+        # Обработка других ошибок
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_comment(request, task_id):
+    try:
+        task_instance = get_object_or_404(Task, id=task_id)
+        check_task_access(request.user.profile, task_instance, 'R')
+        serializer = TaskCommentSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+    except PermissionDenied as e:
+        return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
+    except Exception as e:
+        # Обработка других ошибок
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def toggle_like_rest(request, task_id, comment_id):
+    try:
+        comment = get_object_or_404(TaskComment, id=comment_id)
+        task = get_object_or_404(Task, id=task_id)
+        profile = request.user.profile
+        check_task_access(profile, task, 'R')
+
+        like, created = TaskCommentLike.objects.get_or_create(comment=comment, profile=profile)
+
+        if not created:
+            like.delete()
+
+        return Response(data={'is_liked': created}, status=status.HTTP_200_OK)
     except PermissionDenied as e:
         return Response({'error': str(e)}, status=status.HTTP_403_FORBIDDEN)
     except Exception as e:

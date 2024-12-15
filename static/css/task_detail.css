@@ -3,11 +3,17 @@ main {
     background-color: #f8f9fa;
 }
 
-.task-detail {
+.task-detail, .task-comments {
     padding-top: 30px;
 }
 
-.task-card {
+.task-detail a, .task-comments a {
+    text-decoration: none;
+    color: #212529;
+}
+
+
+.task-card, .comment-card {
     background-color: #ffffff;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -23,7 +29,7 @@ main {
     font-weight: bold;
 }
 
-.task-title {
+.task-title, .comment-title {
     margin: 0;
 }
 
@@ -42,7 +48,6 @@ main {
 .task-field p,
 .task-field span {
     font-size: 1rem;
-    color: #555;
 }
 
 .assigned-user, .created-user {
@@ -58,7 +63,6 @@ main {
 
 .assigned-user span {
     font-size: 1rem;
-    color: #555;
 }
 
 .urgent {
@@ -76,10 +80,33 @@ main {
     justify-content: space-between;
 }
 
-.task-actions .btn {
+.task-actions .btn, .new-comment .btn  {
     padding: 10px 20px;
 }
 
+.avatar-img {
+    object-fit: cover; /* Обеспечивает сохранение пропорций, но заполняет контейнер */
+}
 
+.comment-date {
+    font-size: 0.85em;
+}
+
+.like-container {
+    width: 60px;
+    background-color: #ababab;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease /* Плавный переход */
+}
+
+.liked {
+    color: var(--light_text);
+    background-color: #dd392a;
+}
+
+.like-icon {
+    vertical-align: middle;  /* Центрирует иконку по вертикали */
+}
 
 

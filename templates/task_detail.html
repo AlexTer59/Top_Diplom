@@ -1,14 +1,14 @@
 {% extends 'app_base.html' %}
 {% load static %}
 
-{% block title %}{{ task.title }}{% endblock %}
+{% block title %}Задача {{ task.title }}{% endblock %}
 
 {% block styles %}
     <link rel="stylesheet" href="{% static 'css/task_detail.css' %}">
 {% endblock styles %}
 
 {% block content %}
-<section class="task-detail py-5" id="app" data-list-id="{{ list_id }}" data-task-id="{{ task_id }}" data-board-id="{{ board_id }}" data-user-id="{{ user.profile.id }}" data-default-avatar="{% static 'img/default_avatar.png' %}">
+<section class="task-detail py-2" id="app" data-list-id="{{ list_id }}" data-task-id="{{ task_id }}" data-board-id="{{ board_id }}" data-user-id="{{ user.profile.id }}" data-default-avatar="{% static 'img/default_avatar.png' %}">
     <div class="container">
         <div class="task-card">
             <div class="card-header">
@@ -37,8 +37,10 @@
                     <div class="task-field">
                         <strong>Ответственный:</strong>
                         <div class="assigned-user">
-                            <img :src="task.assigned_to_avatar || defaultAvatar" alt="Avatar" class="avatar-img rounded-circle">
-                            <span>[[ task.assigned_to_username ]]</span>
+                            <a :href="baseUrl + '/users/profiles/' + task.assigned_to_id">
+                                <img :src="task.assigned_to_avatar || defaultAvatar" alt="Avatar" class="avatar-img rounded-circle">
+                                <span>[[ task.assigned_to_username ]]</span>
+                            </a>
                         </div>
                     </div>
                     <div class="task-field">
@@ -48,8 +50,11 @@
                     <div class="task-field">
                         <strong>Создано:</strong>
                             <div class="created-user">
-                                <img :src="task.created_by_avatar || defaultAvatar" alt="Avatar" class="avatar-img rounded-circle">
-                                <span>[[ task.created_by_username ]]</span>
+                                <a :href="baseUrl + '/users/profiles/' + task.created_by_id">
+                                    <img :src="task.created_by_avatar || defaultAvatar" alt="Avatar" class="avatar-img rounded-circle">
+                                    <span>[[ task.created_by_username ]]</span>
+                                </a>
+
                             </div>
                     </div>
                     <div class="task-actions">
@@ -165,8 +170,70 @@
 
 </section>
 
+<section class="task-comments" id="task-comments">
+    <div class="container">
+        <div class="comment-card">
+            <div class="card-header">
+                <h5 class="comment-title">Комментарии ([[ comments ? comments.length : 0 ]])</h5>
+            </div>
+            <div class="card-body">
+                <p v-if="!comments" class="text-center text-muted">Здесь ничего нет</p>
+                <!-- Список комментариев -->
+                <div v-for="comment in comments" :key="comment.id" class="comment mb-4">
+                    <div class="comment-author">
+                        <a class="d-flex gap-2 mb-2 align-items-center"
+                           :href="baseUrl + '/users/profiles/' + comment.profile_id">
+                            <img class="avatar-img rounded-circle"
+                             :src="comment.avatar || defaultAvatar"
+                             alt="User Avatar"
+                             width="60"
+                             height="60"
+                            />
+                            <span class="mb-0 fw-bold">[[ comment.profile_username ]]</span>
+                        </a>
+
+                    </div>
+                    <div class="comment-date">
+                        <span class="comment-date text-muted">Дата: [[ comment.created_at ]]</span>
+                    </div>
+
+                    <p class="comment-text mb-2">[[ comment.comment ]]</p>
+
+                    <div class="like-container d-flex justify-content-center gap-2 align-items-center px-2 py-1 my-2"
+                         :class="comment.is_liked ? 'liked' : ''" @click="toggleLike(comment.id)">
+                        <div class="like-icon pt-1">
+                            <i :class="comment.is_liked ? 'bi bi-heart-fill' : 'bi bi-heart'"></i>
+                        </div>
+                        <p class="mb-0 like-counter"
+                           :class="comment.is_liked ? 'liked' : ''">
+                            [[comment.likes_count]]
+                        </p>
+                    </div>
+                </div>
+                <div class="new-comment">
+                    <textarea
+                        v-model="newCommentText"
+                        placeholder="Напишите комментарий..."
+                        rows="4"
+                        class="form-control"
+                    ></textarea>
+                    <button
+                        :disabled="!newCommentText.trim()"
+                        @click="submitComment"
+                        class="btn btn-primary mt-2"
+                    >
+                        Отправить
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
 {% endblock %}
 
 {% block script %}
 <script src="{% static 'js/task_detail.js' %}"></script>
+<script src="{% static 'js/task-comments.js' %}"></script>
 {% endblock script %}

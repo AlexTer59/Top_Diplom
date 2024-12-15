@@ -165,6 +165,7 @@ class TaskComment(models.Model):
     class Meta:
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
+        ordering = ['created_at']
 
 
 class TaskCommentLike(models.Model):

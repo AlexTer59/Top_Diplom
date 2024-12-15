@@ -105,3 +105,4 @@ def check_task_access(profile, task, permission_type):
             return
 
     raise PermissionDenied("У вас нет доступа к этой задаче.")
+

@@ -6,7 +6,8 @@ from django.utils.timezone import localtime
 from django.db import models
 from rest_framework.exceptions import ValidationError
 
-from core.models import Board, List, Task, TaskComment, TaskCommentLike
+from core.models import *
+from user.models import *
 from django.utils import timezone
 from user.models import *
 from user.serializers import *
@@ -94,6 +95,7 @@ class TaskSerializer(serializers.Serializer):
     labels = serializers.JSONField(required=False, default=dict)
     assigned_to = serializers.PrimaryKeyRelatedField(queryset=Profile.objects.all(), required=False, allow_null=True)
     assigned_to_username = serializers.CharField(source='assigned_to.user.username', read_only=True)
+    assigned_to_id = serializers.IntegerField(source='assigned_to.user.profile.id', read_only=True)
     assigned_to_avatar = serializers.SerializerMethodField()
     created_by_id = serializers.IntegerField(source='created_by.user.profile.id', read_only=True)
     created_by_username = serializers.CharField(source='created_by.user.username', read_only=True)
@@ -211,8 +213,12 @@ class ListSerializer(serializers.Serializer):
 
 class TaskCommentSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
-    note = serializers.CharField(max_length=1024)
-    profile = serializers.CharField(source='profile.user.username', read_only=True)
+    comment = serializers.CharField(max_length=1024)
+    task = serializers.PrimaryKeyRelatedField(queryset=Task.objects.all())
+    profile = serializers.PrimaryKeyRelatedField(queryset=Profile.objects.all(), required=False, allow_null=True)
+    profile_username = serializers.CharField(source='profile.user.username', read_only=True)
+    profile_id = serializers.CharField(source='profile.id', read_only=True)
+    avatar = serializers.SerializerMethodField()
     created_at = serializers.SerializerMethodField()
     likes_count = serializers.SerializerMethodField()
     is_liked = serializers.SerializerMethodField()
@@ -221,11 +227,18 @@ class TaskCommentSerializer(serializers.Serializer):
         return localtime(obj.created_at).strftime('%d-%m-%Y %H:%M')
 
     def get_likes_count(self, obj):
-        return obj.note_likes.count()
+        return obj.comment_likes.count()
 
     def get_is_liked(self, obj):
         profile = self.context['request'].user.profile
-        return TaskNoteLike.objects.filter(profile=profile, note=obj).exists()
+        return TaskCommentLike.objects.filter(profile=profile, comment=obj).exists()
+
+    def get_avatar(self, obj):
+        if obj.profile and obj.profile.avatar:
+            return obj.profile.avatar.url
+        return None
 
     def create(self, validated_data):
-        return TaskNote.objects.create(**validated_data)
+        user_profile = self.context['request'].user.profile
+        validated_data['profile'] = user_profile  # Привязываем профиль текущего пользователя
+        return TaskComment.objects.create(**validated_data)

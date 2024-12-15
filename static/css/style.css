@@ -159,15 +159,6 @@ main {
     width: 100%; /* Полная ширина внутри родительского блока */
 }
 
-.alert {
-    margin-bottom: 10px; /* Расстояние между сообщениями */
-    padding: 15px;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Тень для сообщений */
-    background-color: #f8f9fa; /* Цвет фона */
-    color: #333; /* Цвет текста */
-    transition: opacity 0.3s ease, transform 0.3s ease; /* Плавное появление/исчезновение */
-}
 
 .alert.alert-success {
     background-color: #d4edda; /* Зеленый фон для успешного сообщения */

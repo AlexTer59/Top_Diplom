@@ -1,7 +1,7 @@
 {% extends 'public_base.html' %}
 {% load static %}
 
-{% block title %}Личный кабинет{% endblock %}
+{% block title %}Личный кабинет {{ request.user.username }}{% endblock %}
 
 {% block styles %}
 <link rel="stylesheet" href="{% static 'css/profile.css' %}">

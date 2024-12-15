@@ -32,8 +32,11 @@ urlpatterns = [
 
 
 
-    # ======================= task notes views ========================
-    path('boards/<int:board_id>/lists/<int:list_id>/tasks/<int:task_id>/notes', get_notes, name='get_notes_from_task')
+    # ======================= task comments views ========================
+    path('tasks/<int:task_id>/comments/', get_comments, name='get_comments_from_task'),
+    path('tasks/<int:task_id>/comments/create', create_comment, name='create_comment'),
+    path('tasks/<int:task_id>/comments/<int:comment_id>/like/', toggle_like_rest, name='create_comment'),
+
 ]
 
 
