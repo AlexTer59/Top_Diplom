@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from core.models import *
 from user.models import *
-from .serializers import BoardSerializer, ListSerializer, TaskSerializer, TaskNoteSerializer
+from .serializers import BoardSerializer, ListSerializer, TaskSerializer, TaskCommentSerializer
 from .utils import *
 
 

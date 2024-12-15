@@ -6,7 +6,7 @@ from django.utils.timezone import localtime
 from django.db import models
 from rest_framework.exceptions import ValidationError
 
-from core.models import Board, List, Task, TaskNote, TaskNoteLike
+from core.models import Board, List, Task, TaskComment, TaskCommentLike
 from django.utils import timezone
 from user.models import *
 from user.serializers import *
@@ -209,7 +209,7 @@ class ListSerializer(serializers.Serializer):
 
         return instance
 
-class TaskNoteSerializer(serializers.Serializer):
+class TaskCommentSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     note = serializers.CharField(max_length=1024)
     profile = serializers.CharField(source='profile.user.username', read_only=True)

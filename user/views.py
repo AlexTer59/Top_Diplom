@@ -80,7 +80,7 @@ class ProfileView(LoginRequiredMixin, TemplateView):
             ).distinct()
 
             # Мои задачи (все задачи, назначенные на пользователя)
-            tasks = Task.objects.filter(assigned_to=user_profile).select_related('board', 'status')
+            tasks = Task.objects.filter(assigned_to=user_profile, board__in=boards).select_related('board', 'status')
 
             # Сортируем задачи
             tasks = sorted(

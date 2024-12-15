@@ -5,6 +5,6 @@ from .models import *
 admin.site.register(Board)
 admin.site.register(List)
 admin.site.register(Task)
-admin.site.register(TaskNote)
-admin.site.register(TaskNoteLike)
+admin.site.register(TaskComment)
+admin.site.register(TaskCommentLike)
 

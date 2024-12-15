@@ -145,32 +145,32 @@ class Task(models.Model):
         return self.title
 
 
-class TaskNote(models.Model):
-    note = models.TextField(max_length=1024, verbose_name='Заметка')
+class TaskComment(models.Model):
+    comment = models.TextField(max_length=1024, verbose_name='Комментарий')
     task = models.ForeignKey(Task,
                              blank=True,
                              null=True,
                              on_delete=models.CASCADE,
-                             related_name='task_note',
+                             related_name='comments',
                              verbose_name='Задача')
     created_at = models.DateTimeField(auto_now_add=True)
     profile = models.ForeignKey(Profile,
-                                related_name='profile_notes',
+                                related_name='profile_comments',
                                 on_delete=models.CASCADE,
                                 verbose_name='Профиль')
 
     def __str__(self):
-        return f'{self.note[:15]}...'
+        return f'{self.comment[:15]}...'
 
     class Meta:
-        verbose_name = 'Заметка'
-        verbose_name_plural = 'Заметки'
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
 
 
-class TaskNoteLike(models.Model):
-    note = models.ForeignKey(TaskNote,
+class TaskCommentLike(models.Model):
+    comment = models.ForeignKey(TaskComment,
                              on_delete=models.CASCADE,
-                             related_name='note_likes',
+                             related_name='comment_likes',
                              )
     profile = models.ForeignKey(Profile,
                                 on_delete=models.CASCADE,
@@ -178,7 +178,7 @@ class TaskNoteLike(models.Model):
     created_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'{self.profile.user.username} лайкнул заметку "{self.note.note[:20]}..."'
+        return f'{self.profile.user.username} лайкнул заметку "{self.comment.comment[:20]}..."'
 
     class Meta:
         verbose_name = 'Лайк'
