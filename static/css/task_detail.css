@@ -12,6 +12,10 @@ main {
     color: #212529;
 }
 
+.task-detail a:hover, .task-comments a:hover {
+    text-decoration: underline;
+}
+
 
 .task-card, .comment-card {
     background-color: #ffffff;

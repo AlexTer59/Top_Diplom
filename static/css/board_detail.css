@@ -11,6 +11,15 @@ main {
     overflow-y: auto; /* Прокрутка по вертикали */
 }
 
+.kanban-board a {
+    text-decoration: none;
+    color: #212529;
+}
+
+.kanban-board a:hover {
+    text-decoration: underline;
+}
+
 .container-fluid {
     padding: 0 15px;
     max-width: 100%; /* Ограничиваем максимальной шириной */
@@ -155,9 +164,6 @@ main {
     font-size: 0.9rem;
 }
 
-.task-user img {
-    border: 1px solid #ddd;
-}
 
 /* Стили футера карточки */
 .card-footer {
