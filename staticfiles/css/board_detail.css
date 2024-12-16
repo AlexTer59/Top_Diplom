@@ -1,0 +1,237 @@
+/* Общие стили для страницы */
+main {
+    background-color: #f8f9fa;
+}
+
+/* Контейнер для канбан-доски */
+.kanban-board {
+    background-color: #f8f9fa;
+    padding: 20px 0;
+    height: 90vh; /* Ограничиваем высоту всей доски */
+    overflow-y: auto; /* Прокрутка по вертикали */
+}
+
+.kanban-board a {
+    text-decoration: none;
+    color: #212529;
+}
+
+.kanban-board a:hover {
+    text-decoration: underline;
+}
+
+.container-fluid {
+    padding: 0 15px;
+    max-width: 100%; /* Ограничиваем максимальной шириной */
+}
+
+
+/* Обертка для канбан-доски с возможностью прокрутки */
+.kanban-board-wrapper {
+    display: flex;
+    gap: 20px;
+    padding-top: 30px;
+    justify-content: start;
+    flex-wrap: nowrap;
+}
+
+/* Полоса прокрутки для доски */
+.kanban-board-wrapper::-webkit-scrollbar {
+    height: 8px;
+}
+
+.kanban-board-wrapper::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+}
+
+.kanban-board-wrapper::-webkit-scrollbar-track {
+    background-color: transparent;
+}
+
+/* Стили для каждой колонки */
+.kanban-column {
+    flex: 0 0 350px; /* Фиксированная ширина колонки */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Стили для кнопки "Добавить список" */
+.kanban-add-column {
+    flex: 0 0 300px;
+    display: flex;
+    justify-content: center;
+    align-items: start;
+}
+
+/* Контейнер для описания доски */
+.board-description-container {
+    max-width: 400px; /* Ширина контейнера 30% */
+    margin: 0 auto; /* Центрируем контейнер по горизонтали */
+    padding: 10px;
+    border-radius: 8px;
+    text-align: center; /* Текст по центру */
+    margin-bottom: 20px;
+}
+
+/* Стиль для текста описания */
+.board-description {
+    font-size: 1rem;
+    color: #333;
+    word-wrap: break-word; /* Перенос слов */
+    overflow-wrap: break-word; /* Перенос длинных слов */
+}
+
+/* Стили карточек и их содержимого */
+.card {
+    margin-bottom: 20px;
+}
+
+.card-header {
+    background-color: #3076f9;
+    font-size: 1.2rem;
+    font-weight: bold;
+    text-align: center;
+}
+
+/* Иконка ручки редактирования */
+.list-edit {
+    color: #b3b3b3; /* Исходный цвет */
+    cursor: pointer;
+    transition: color 0.3s ease;
+    right: 10px; /* Размещаем иконку справа */
+    top: 50%; /* Центрируем иконку по вертикали */
+    transform: translateY(-50%); /* Для точного вертикального выравнивания */
+}
+
+/* Стили для стрелочек перемещения */
+.move-arrow, .task-edit {
+    color: #6c757d; /* Серый цвет по умолчанию */
+    cursor: pointer;
+    font-size: 1.5rem; /* Размер иконки */
+    transition: color 0.3s ease; /* Плавное изменение цвета */
+}
+
+.task-edit {
+    font-size: 1rem; /* Размер иконки */
+}
+
+.task-edit:hover {
+    cursor: pointer;
+    color: var(--blue);
+}
+
+.move-arrow:hover {
+    cursor: pointer;
+    color: var(--blue);
+}
+
+/* При наведении на иконку цвет меняется на белый */
+.list-edit:hover  {
+    color: #ffffff;
+}
+
+.card-body {
+    max-height: none; /* Убираем ограничение высоты */
+    overflow: visible; /* Убираем прокрутку */
+}
+
+.task-in-progress {
+    background-color: #ffffff; /* Белый цвет для задач в процессе */
+}
+
+.task-urgent {
+    background-color: #f5c76b; /* Желтый цвет для срочных задач */
+
+}
+
+.task-overdue {
+    background-color: #de7777; /* Светло-красный для просроченных задач */
+}
+
+/* Стиль заголовка задачи */
+.task-title {
+    font-size: 1rem;
+    font-weight: bold;
+    word-wrap: break-word; /* Разрешаем перенос длинных слов */
+    white-space: normal; /* Разрешаем перенос строк */
+    overflow-wrap: break-word; /* Перенос длинных слов */
+    max-width: 100%; /* Ограничиваем ширину заголовка */
+    word-break: break-word; /* Обеспечивает перенос даже при отсутствии пробелов */
+}
+
+.task-deadline {
+    font-size: 0.9rem;
+}
+
+
+/* Стили футера карточки */
+.card-footer {
+    background-color: #ffffff;
+    padding: 10px;
+    border-top: 1px solid #ddd;
+    transition: background-color 0.3s ease;
+}
+
+.card-footer button {
+    border-bottom-left-radius: 0.375rem;
+    border-bottom-right-radius: 0.375rem;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    padding: 11px 20px;
+}
+
+.card-footer:hover {
+    background-color: #f2f2f2;
+}
+
+.btn-primary {
+    background-color: #3076f9;
+    color: #ffffff;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #2569d4;
+}
+
+.btn-outline-primary {
+    transition: background-color 0.3s ease;
+}
+
+.btn-outline-primary:hover {
+    background-color: #3076f9;
+    color: white;
+}
+
+/* Затенение фона при открытии попапа */
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+/* Стиль самого попапа */
+.popup {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    width: 400px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.popup h5 {
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.popup .btn {
+    width: 100px;
+}

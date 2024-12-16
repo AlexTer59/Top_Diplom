@@ -93,6 +93,11 @@ new Vue({
                 return;
             }
 
+            if (!this.newTaskAssignedTo) {
+                alert("Пожалуйста, выберите исполнителя.");
+                return;
+            }
+
             try {
                 // Подготовка данных для обновления задачи
                 const updatedTaskData = {

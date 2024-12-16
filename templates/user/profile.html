@@ -29,8 +29,8 @@
             <div class="col-md-8">
                 <h4>Личная информация</h4>
                 <ul class="list-group">
-                    <li class="list-group-item"><strong>Имя:</strong> [[ profile.first_name ]]</li>
-                    <li class="list-group-item"><strong>Фамилия:</strong> [[ profile.last_name ]]</li>
+                    <li class="list-group-item"><strong>Имя:</strong> [[ profile.first_name ? profile.first_name : '-' ]]</li>
+                    <li class="list-group-item"><strong>Фамилия:</strong> [[ profile.last_name ? profile.last_name : '-' ]]</li>
                     <li class="list-group-item"><strong>Дата рождения:</strong> [[ formatDate(profile.birth_date) ]]</li>
                     <li class="list-group-item"><strong>Дата регистрации:</strong> [[ formatDate(profile.created_at) ]]</li>
                     <li class="list-group-item"><strong>Тип подписки:</strong> {{ subscription_type }}</li>

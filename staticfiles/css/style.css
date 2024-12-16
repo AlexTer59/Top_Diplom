@@ -1,0 +1,188 @@
+/* VARIABLES */
+:root {
+    --bg_transparent: #00000000;
+    --light_text: white;
+    --dark_text: #212529;
+    --blue: #3076f9;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+html, body {
+    height: 100%;
+}
+
+body {
+    display: flex;
+    position: relative;
+    flex-direction: column;
+}
+
+main {
+    flex: 1 0 auto;
+}
+
+/* =================================================== HEADER =================================================== */
+.navbar {
+    background-color: #026aa7;
+}
+
+.dark-text {
+    color: var(--dark_text);
+}
+
+.outline {
+    text-shadow:
+    -1px -1px 0 gray,
+    1px -1px 0 gray,
+    -1px 1px 0 gray,
+    1px 1px 0 gray;
+}
+
+.navbar-brand {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 2rem;
+    color: var(--light_text);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+.navbar-brand:hover {
+    text-decoration: none;
+    color: var(--blue);
+}
+
+.navbar-nav .nav-link {
+    color: white;
+    display: flex;
+    align-items: center;
+    height: 100%;
+    padding: 0 10px;
+}
+
+.navbar-brand span {
+    color: orange;
+    letter-spacing: -2px;
+}
+
+.navbar-brand:hover, .nav-link:hover {
+    color: var(--blue);
+    transition: 0.2s;
+}
+
+.nav-item {
+    margin-right: 10px;
+}
+
+.dropdown a {
+    color: var(--light_text);
+
+}
+
+.dropdown-menu .dropdown-item {
+    color: var(--dark_text);
+}
+
+#sidebar {
+    z-index: 1050; /* Устанавливаем высокий z-index */
+    position: fixed; /* Фиксируем панель */
+    top: 0;
+    left: 0;
+    width: 250px; /* Фиксированная ширина */
+    height: 100vh; /* Высота на весь экран */
+    background-color: #343a40; /* Фон панели */
+    color: white;
+    padding: 20px;
+    transform: translateX(-100%); /* Скрыто по умолчанию */
+    transition: transform 0.3s ease-in-out; /* Плавное появление/скрытие */
+}
+
+/* Когда класс 'active' добавлен, панель будет выдвигаться */
+#sidebar.active {
+    transform: translateX(0); /* Выдвигаем панель */
+}
+
+#sidebarClose {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1100; /* Кнопка закрытия всегда поверх */
+}
+
+.sidebar-menu li a {
+    color: var(--light_text);
+    transition: 0.2s;
+}
+
+.sidebar-menu li a:hover {
+    color: var(--blue)
+}
+
+
+
+
+/* =================================================== MAIN =================================================== */
+
+.hero-section {
+    position: relative;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+                      url('/static/img/header_bg_img.jpg');
+    background-size: cover; /* Масштабирует изображение, чтобы оно заполнило блок */
+    background-position: center; /* Центрирует изображение */
+    color: white; /* Белый текст поверх */
+    text-align: center; /* Центрирование текста */
+    padding: 100px 20px; /* Отступы внутри секции */
+}
+
+.avatar-img {
+    object-fit: cover; /* Обеспечивает сохранение пропорций, но заполняет контейнер */
+}
+
+.feature-title {
+    color: #2e6df7;
+}
+
+.alert-container {
+    position: absolute; /* Меняем fixed на absolute */
+    top: 80px;
+    left: 20px;
+    z-index: 1050; /* Устанавливаем высокий z-index для перекрытия других элементов */
+    max-width: 300px;
+    width: 100%; /* Полная ширина внутри родительского блока */
+}
+
+
+.alert.alert-success {
+    background-color: #d4edda; /* Зеленый фон для успешного сообщения */
+    color: #155724; /* Темно-зеленый текст */
+    border: 1px solid #c3e6cb; /* Обводка для успешного сообщения */
+}
+
+.alert.alert-error {
+    background-color: #f8d7da; /* Красный фон для ошибки */
+    color: #721c24; /* Темно-красный текст */
+    border: 1px solid #f5c6cb; /* Обводка для ошибки */
+}
+
+
+/* =================================================== FOOTER =================================================== */
+
+footer {
+    background-color: #333;
+    color: white;
+    padding: 20px 0;
+}
+footer a {
+    color: #00bcd4;
+}
+footer a:hover {
+    text-decoration: underline;
+}

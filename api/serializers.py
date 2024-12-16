@@ -93,7 +93,7 @@ class TaskSerializer(serializers.Serializer):
     created_at_datetime = serializers.SerializerMethodField(read_only=True)
     updated_at_datetime = serializers.SerializerMethodField(read_only=True)
     labels = serializers.JSONField(required=False, default=dict)
-    assigned_to = serializers.PrimaryKeyRelatedField(queryset=Profile.objects.all(), required=False, allow_null=True)
+    assigned_to = serializers.PrimaryKeyRelatedField(queryset=Profile.objects.all(), required=True)
     assigned_to_username = serializers.CharField(source='assigned_to.user.username', read_only=True)
     assigned_to_id = serializers.IntegerField(source='assigned_to.user.profile.id', read_only=True)
     assigned_to_avatar = serializers.SerializerMethodField()

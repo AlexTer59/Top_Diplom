@@ -1,0 +1,71 @@
+/* Общие стили карточек */
+.pricing-card {
+    display: flex;
+    flex-direction: column; /* Вертикальная компоновка */
+    justify-content: space-between; /* Промежутки между блоками */
+    height: 100%; /* Растягиваем карточки */
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+    background-color: #fff;
+    overflow: hidden; /* Включает подчинение внутреннего содержимого */
+}
+
+.pricing-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Верхний заголовок карточки */
+.pricing-card .card-header {
+    padding: 20px;
+    background-color: #007bff;
+    color: white;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+}
+
+/* Тело карточки */
+.pricing-card .card-body {
+    padding: 20px;
+    flex-grow: 1; /* Растягиваем тело карточки */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.card-text {
+    color: var(--blue);
+    font-size: 18px;
+}
+
+/* Блок цен */
+.price {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 80px;
+    margin-top: 10px;
+}
+
+.old-price {
+    font-size: 0.9rem;
+    color: #888;
+    text-decoration: line-through;
+    margin-top: 5px;
+}
+
+/* Нижняя кнопка */
+.pricing-card .card-footer {
+    padding: 15px;
+    background-color: #f7f7f7;
+    border-top: 1px solid #ddd;
+}
+
+.pricing-card .btn {
+    font-size: 1rem;
+    font-weight: bold;
+    width: 100%;
+}

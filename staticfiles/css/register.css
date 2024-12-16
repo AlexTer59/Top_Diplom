@@ -1,0 +1,13 @@
+.card-header {
+    background-color: #007bff; /* Синий цвет для шапки */
+}
+
+.btn-primary {
+    background-color: #007bff; /* Синий цвет для кнопки */
+    border-color: #007bff; /* Цвет рамки для кнопки */
+}
+
+.btn-primary:hover {
+    background-color: #0056b3; /* Цвет кнопки при наведении */
+    border-color: #004085;
+}

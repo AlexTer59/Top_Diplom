@@ -349,6 +349,12 @@ new Vue({
                 alert("Введите название задачи");
                 return;
             }
+
+            if (!this.newTaskAssignedTo) {
+                alert("Пожалуйста, выберите исполнителя.");
+                return;
+            }
+
             try {
                 const taskData = {
                     title: this.newTaskTitle,
@@ -408,12 +414,17 @@ new Vue({
         },
 
         canEditTask(task) {
-            return this.isOwner || task.created_by_id === this.$el.getAttribute('data-user-id');
+            return this.isOwner || task.created_by_id == this.$el.getAttribute('data-user-id');
         },
 
         async editTask() {
             if (!this.newTaskTitle.trim()) {
                 alert("Введите название задачи");
+                return;
+            }
+
+            if (!this.newTaskAssignedTo) {
+                alert("Пожалуйста, выберите исполнителя.");
                 return;
             }
 
